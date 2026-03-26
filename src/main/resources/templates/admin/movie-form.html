@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Form phim')}"></head>
+<body>
+<div class="container-fluid admin-shell">
+    <div class="row g-0 min-vh-100">
+        <div class="col-xl-2 col-lg-3 d-none d-lg-block">
+            <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+        </div>
+        <div class="col-xl-10 col-lg-9">
+            <div class="p-4 p-lg-5">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="fw-bold text-white mb-1" th:text="${movieForm.id == null ? 'Thêm phim mới' : 'Cập nhật phim'}">Thêm phim mới</h1>
+                        <p class="text-secondary mb-0">Nhập thông tin đầy đủ để hiển thị đẹp ở trang người dùng.</p>
+                    </div>
+                    <a class="btn btn-outline-light" th:href="@{/admin/movies}">Quay lại</a>
+                </div>
+                <div class="glass-panel">
+                    <form th:action="@{/admin/movies/save}" th:object="${movieForm}" method="post" enctype="multipart/form-data" class="row g-3">
+                        <input type="hidden" th:field="*{id}">
+                        <input type="hidden" th:field="*{existingPosterUrl}">
+                        <input type="hidden" th:field="*{existingBackdropUrl}">
+                        <div class="col-md-6"><label class="form-label">Tên phim</label><input th:field="*{title}" class="form-control"><div class="invalid-feedback d-block" th:errors="*{title}"></div></div>
+                        <div class="col-md-6"><label class="form-label">Tên gốc</label><input th:field="*{originalTitle}" class="form-control"></div>
+                        <div class="col-md-8"><label class="form-label">Mô tả ngắn</label><input th:field="*{shortDescription}" class="form-control"><div class="invalid-feedback d-block" th:errors="*{shortDescription}"></div></div>
+                        <div class="col-md-4"><label class="form-label">Trailer URL</label><input th:field="*{trailerUrl}" class="form-control"></div>
+                        <div class="col-12"><label class="form-label">Mô tả chi tiết</label><textarea th:field="*{description}" class="form-control" rows="5"></textarea><div class="invalid-feedback d-block" th:errors="*{description}"></div></div>
+                        <div class="col-md-2"><label class="form-label">Năm</label><input th:field="*{releaseYear}" type="number" class="form-control"></div>
+                        <div class="col-md-2"><label class="form-label">Phút</label><input th:field="*{durationMinutes}" type="number" class="form-control"></div>
+                        <div class="col-md-2"><label class="form-label">Loại</label><select th:field="*{movieType}" class="form-select"><option th:each="type : ${movieTypes}" th:value="${type}" th:text="${type}"></option></select></div>
+                        <div class="col-md-2"><label class="form-label">Access</label><select th:field="*{accessLevel}" class="form-select"><option th:each="level : ${accessLevels}" th:value="${level}" th:text="${level}"></option></select></div>
+                        <div class="col-md-4">
+                            <label class="form-label">Quốc gia</label>
+                            <input th:field="*{countryName}" class="form-control" placeholder="Ví dụ: Hàn Quốc">
+                            <div class="invalid-feedback d-block" th:errors="*{countryName}"></div>
+                        </div>
+                        <div class="col-md-6"><label class="form-label">Poster</label><input type="file" th:field="*{posterFile}" class="form-control"></div>
+                        <div class="col-md-6"><label class="form-label">Backdrop</label><input type="file" th:field="*{backdropFile}" class="form-control"></div>
+                        <div class="col-md-4">
+                            <label class="form-label">Thể loại</label>
+                            <div class="dropdown genre-dropdown w-100">
+                                <button class="form-select text-start genre-dropdown-toggle"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        data-bs-auto-close="outside"
+                                        aria-expanded="false">
+                                    Chọn thể loại
+                                </button>
+                                <div class="dropdown-menu genre-dropdown-menu">
+                                    <div class="form-check" th:each="genre : ${genres}">
+                                        <input class="form-check-input genre-checkbox"
+                                               type="checkbox"
+                                               th:id="${'genre-' + genre.id}"
+                                               th:value="${genre.id}"
+                                               th:data-name="${genre.name}"
+                                               th:checked="${movieForm.genreIds != null and #lists.contains(movieForm.genreIds, genre.id)}">
+                                        <label class="form-check-label"
+                                               th:for="${'genre-' + genre.id}"
+                                               th:text="${genre.name}"></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <select multiple th:field="*{genreIds}" class="d-none genre-select-hidden">
+                                <option th:each="genre : ${genres}" th:value="${genre.id}" th:text="${genre.name}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Diễn viên</label>
+                            <input th:field="*{actorNames}" class="form-control"
+                                placeholder="Nhập nhiều tên, cách nhau bằng dấu phẩy">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">Đạo diễn</label>
+                            <input th:field="*{directorNames}" class="form-control"
+                                placeholder="Nhập nhiều tên, cách nhau bằng dấu phẩy">
+                        </div>
+                        <div class="col-12 d-flex gap-4 flex-wrap">
+                            <div class="form-check"><input class="form-check-input" type="checkbox" th:field="*{featured}"><label class="form-check-label">Featured</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" th:field="*{popular}"><label class="form-check-label">Popular</label></div>
+                            <div class="form-check"><input class="form-check-input" type="checkbox" th:field="*{active}"><label class="form-check-label">Active</label></div>
+                        </div>
+                        <div class="col-12"><button class="btn btn-accent">Lưu phim</button></div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.querySelector('.genre-dropdown');
+    const hiddenSelect = document.querySelector('.genre-select-hidden');
+
+    if (!container || !hiddenSelect) return;
+
+    const toggle = container.querySelector('.genre-dropdown-toggle');
+    const checkboxes = Array.from(container.querySelectorAll('.genre-checkbox'));
+    const options = Array.from(hiddenSelect.options);
+
+    function syncHiddenSelect() {
+        const selectedValues = checkboxes
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => String(checkbox.value));
+
+        options.forEach(option => {
+            option.selected = selectedValues.includes(String(option.value));
+        });
+    }
+
+    function updateLabel() {
+        const selectedNames = checkboxes
+            .filter(checkbox => checkbox.checked)
+            .map(checkbox => checkbox.dataset.name)
+            .filter(Boolean);
+
+        const text = selectedNames.length ? selectedNames.join(', ') : 'Chọn thể loại';
+        toggle.textContent = text;
+        toggle.title = text;
+    }
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function () {
+            syncHiddenSelect();
+            updateLabel();
+        });
+    });
+
+    syncHiddenSelect();
+    updateLabel();
+});
+</script>
+</body>
+</html>

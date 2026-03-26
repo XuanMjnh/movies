@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Quản lý phim')}"></head>
+<body>
+<div class="container-fluid admin-shell">
+    <div class="row g-0 min-vh-100">
+        <div class="col-xl-2 col-lg-3 d-none d-lg-block">
+            <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+        </div>
+        <div class="col-xl-10 col-lg-9">
+            <div class="p-4 p-lg-5">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                    <div>
+                        <h1 class="fw-bold text-white mb-1">Quản lý phim</h1>
+                        <p class="text-secondary mb-0">Quản lý nội dung, poster, quyền truy cập và tập phim.</p>
+                    </div>
+                    <a class="btn btn-accent" th:href="@{/admin/movies/new}">+ Thêm phim</a>
+                </div>
+                <div class="glass-panel">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle mb-0">
+                            <thead><tr><th>Phim</th><th>Loại</th><th>Access</th><th>View</th><th>Rating</th><th></th></tr></thead>
+                            <tbody>
+                            <tr th:each="movie : ${movies}">
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <img th:src="${movie.posterUrl != null and !movie.posterUrl.isBlank() ? movie.posterUrl : '/images/default-poster.svg'}" class="admin-thumb" th:alt="${movie.title}">
+                                        <div>
+                                            <div class="fw-semibold" th:text="${movie.title}">Movie</div>
+                                            <div class="small text-secondary" th:text="${movie.releaseYear}">2025</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td th:text="${movie.movieType}">MOVIE</td>
+                                <td th:text="${movie.accessLevel}">FREE</td>
+                                <td th:text="${movie.viewCount}">0</td>
+                                <td th:text="${movie.averageRating}">0</td>
+                                <td>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a class="btn btn-sm btn-outline-light" th:href="@{/admin/movies/{movieId}/episodes(movieId=${movie.id})}">Tập</a>
+                                        <a class="btn btn-sm btn-outline-warning" th:href="@{/admin/movies/{movieId}/edit(movieId=${movie.id})}">Sửa</a>
+                                        <form th:action="@{/admin/movies/{movieId}/delete(movieId=${movie.id})}" method="post" onsubmit="return confirm('Xóa phim này?')">
+                                            <button class="btn btn-sm btn-outline-danger">Xóa</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

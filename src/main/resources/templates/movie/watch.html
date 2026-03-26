@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head(${ 'Xem phim - ' + movie.title })}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div th:replace="~{fragments/alerts :: alerts}"></div>
+<main class="container-fluid container-stream py-4 py-lg-5">
+    <div class="row g-4">
+        <div class="col-lg-9">
+            <div class="glass-panel p-0 overflow-hidden position-relative player-shell">
+                <div th:if="${canWatch}" class="ratio ratio-16x9 bg-black">
+                    <video id="moviePlayer" class="w-100 h-100" controls preload="metadata" th:attr="data-episode-id=${currentEpisode.id}">
+                        <source th:src="${currentEpisode.videoUrl}" type="video/mp4">
+                        Trình duyệt của bạn không hỗ trợ video HTML5.
+                    </video>
+                </div>
+                <div th:if="${!canWatch}" class="upgrade-overlay p-5 text-center">
+                    <div class="display-4 text-accent mb-3"><i class="bi bi-lock-fill"></i></div>
+                    <h2 class="text-white fw-bold">Nội dung yêu cầu gói <span th:text="${movie.accessLevel != null ? movie.accessLevel : 'PREMIUM'}">PREMIUM</span></h2>
+                    <p class="text-secondary">Tài khoản hiện tại chưa đủ quyền để xem bộ phim này. Hãy nạp tiền và nâng cấp gói thành viên.</p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a class="btn btn-accent" th:href="@{/subscription/plans}">Xem bảng giá</a>
+                        <a class="btn btn-surface-outline" th:href="@{/user/wallet}">Đi tới ví tiền</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel mt-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <h1 class="h2 text-white mb-1" th:text="${movie.title != null ? movie.title : 'Đang cập nhật'}">Movie</h1>
+                        <p class="text-secondary mb-0">Đang xem tập <span th:text="${currentEpisode.episodeNumber != null ? currentEpisode.episodeNumber : '?'}">1</span> - <span th:text="${currentEpisode.title != null ? currentEpisode.title : 'Đang cập nhật'}">Title</span></p>
+                    </div>
+                    <a class="btn btn-surface-outline" th:href="@{/movies/{id}(id=${movie.id})}">Quay về chi tiết</a>
+                </div>
+                <p class="text-light-emphasis mb-0" th:text="${movie.description != null and !movie.description.isBlank() ? movie.description : 'Mô tả phim đang được cập nhật.'}">description</p>
+            </div>
+        </div>
+
+        <div class="col-lg-3">
+            <div class="glass-panel mb-4">
+                <h4 class="text-white">Danh sách tập</h4>
+                <div class="list-group list-group-flush mt-3" th:if="${movie.episodes != null and !#lists.isEmpty(movie.episodes)}">
+                    <a th:each="episode : ${movie.episodes}" class="list-group-item bg-transparent border-secondary-subtle text-white d-flex justify-content-between align-items-center" th:classappend="${episode.id == currentEpisode.id} ? ' active-episode'" th:href="@{/movies/{movieId}/watch(movieId=${movie.id}, episodeId=${episode.id})}">
+                        <span>Tập <span th:text="${episode.episodeNumber != null ? episode.episodeNumber : '?'}">1</span></span>
+                        <small th:text="${episode.durationMinutes != null ? episode.durationMinutes + 'p' : 'N/A'}">40p</small>
+                    </a>
+                </div>
+            </div>
+
+            <div class="glass-panel">
+                <h4 class="text-white">Có thể bạn thích</h4>
+                <div class="vstack gap-3 mt-3" th:if="${relatedMovies != null and !#lists.isEmpty(relatedMovies)}">
+                    <a th:each="related : ${relatedMovies}" th:href="@{/movies/{id}(id=${related.id})}" class="premium-mini-card text-decoration-none" th:with="poster=${related.posterUrl != null and !related.posterUrl.isBlank() ? related.posterUrl : '/images/default-poster.svg'}">
+                        <img th:src="${poster}" th:alt="${related.title != null ? related.title : 'Movie'}">
+                        <div>
+                            <h6 class="mb-1 text-white" th:text="${related.title != null ? related.title : 'Đang cập nhật'}">Movie</h6>
+                            <div class="small text-secondary" th:text="${related.accessLevel != null ? related.accessLevel : 'FREE'}">FREE</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script sec:authorize="isAuthenticated()" th:inline="javascript">
+    const canWatch = /*[[${canWatch}]]*/ false;
+    const player = document.getElementById('moviePlayer');
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+    if (player && canWatch) {
+        let lastSent = 0;
+        const sendProgress = (completed = false) => {
+            const current = Math.floor(player.currentTime || 0);
+            if (!completed && Math.abs(current - lastSent) < 20) {
+                return;
+            }
+            lastSent = current;
+            const payload = {
+                episodeId: Number(player.dataset.episodeId),
+                positionSeconds: current,
+                completed: completed
+            };
+            const headers = { 'Content-Type': 'application/json' };
+            if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+            }
+            fetch('/user/history/progress', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(payload)
+            }).catch(() => {});
+        };
+
+        setInterval(() => sendProgress(false), 20000);
+        player.addEventListener('pause', () => sendProgress(false));
+        player.addEventListener('ended', () => sendProgress(true));
+        window.addEventListener('beforeunload', () => sendProgress(false));
+    }
+</script>
+</body>
+</html>

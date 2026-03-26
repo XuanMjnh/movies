@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<nav th:fragment="navbar" class="navbar navbar-expand-xl sticky-top app-navbar">
+    <div class="container-fluid container-stream nav-shell">
+        <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
+            <span class="brand-logo"><i class="bi bi-play-fill"></i></span>
+            <span class="brand-name">Ro<span class="text-accent">Stream</span></span>
+        </a>
+        <div class="d-flex align-items-center gap-2 order-xl-3">
+            <button class="btn btn-icon btn-surface theme-toggle" type="button" aria-label="Đổi giao diện" data-theme-toggle>
+                <i class="bi bi-moon-stars-fill theme-icon-dark"></i>
+                <i class="bi bi-brightness-high-fill theme-icon-light"></i>
+            </button>
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+        <div class="collapse navbar-collapse order-xl-2" id="mainNavbar">
+           <ul class="navbar-nav me-auto mb-2 mb-xl-0 gap-xl-2 nav-pills-stream">
+                <li class="nav-item"><a class="nav-link" th:href="@{/}">Trang chủ</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/movies}">Tất cả phim</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/movies(movieType='MOVIE')}">Phim lẻ</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/movies(movieType='SERIES')}">Phim bộ</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/subscription/plans}">Gói thành viên</a></li>
+                <li class="nav-item" sec:authorize="hasAuthority('ROLE_ADMIN')"><a class="nav-link" th:href="@{/admin}">Admin</a></li>
+            </ul>
+
+            <form class="d-flex app-search my-3 my-xl-0 ms-xl-4 me-xl-3" th:action="@{/movies}" method="get">
+                <input class="form-control" type="search" name="keyword" placeholder="Tìm phim, tên gốc, diễn viên...">
+                <button class="btn btn-accent" type="submit"><i class="bi bi-search"></i></button>
+            </form>
+
+            <div class="d-flex align-items-center gap-2 flex-wrap" sec:authorize="isAnonymous()">
+                <a class="btn btn-surface" th:href="@{/login}">Đăng nhập</a>
+                <a class="btn btn-accent" th:href="@{/register}">Đăng ký</a>
+            </div>
+
+            <div class="dropdown" sec:authorize="isAuthenticated()">
+                <button class="btn btn-surface dropdown-toggle d-flex align-items-center gap-2" data-bs-toggle="dropdown">
+                    <img th:src="${loggedInUser != null and loggedInUser.avatarUrl != null and !loggedInUser.avatarUrl.isBlank() ? loggedInUser.avatarUrl : '/images/default-poster.svg'}" alt="avatar" class="avatar-xs rounded-circle">
+                    <span th:text="${loggedInUser != null and loggedInUser.fullName != null and !loggedInUser.fullName.isBlank() ? loggedInUser.fullName : 'User'}">User</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-stream shadow-lg border-0">
+                    <li><span class="dropdown-item-text small text-secondary">Gói hiện tại: <strong class="text-white" th:text="${currentAccessLevel}">FREE</strong></span></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" th:href="@{/user/profile}">Hồ sơ cá nhân</a></li>
+                    <li><a class="dropdown-item" th:href="@{/user/favorites}">Yêu thích</a></li>
+                    <li><a class="dropdown-item" th:href="@{/user/history}">Lịch sử xem</a></li>
+                    <li><a class="dropdown-item" th:href="@{/user/wallet}">Ví tiền</a></li>
+                    <li><a class="dropdown-item" th:href="@{/user/subscription/current}">Thành viên</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form th:action="@{/logout}" method="post" class="m-0">
+                            <button class="dropdown-item text-danger" type="submit">Đăng xuất</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

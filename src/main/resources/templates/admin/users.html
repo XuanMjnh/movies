@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Quản lý người dùng')}"></head>
+<body>
+<div class="container-fluid admin-shell">
+    <div class="row g-0 min-vh-100">
+        <div class="col-xl-2 col-lg-3 d-none d-lg-block">
+            <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+        </div>
+        <div class="col-xl-10 col-lg-9">
+            <div class="p-4 p-lg-5">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="row g-4">
+                    <div class="col-xl-4">
+                        <div class="glass-panel h-100">
+                            <h1 class="h4 text-white mb-3">Cập nhật người dùng</h1>
+                            <form th:action="@{/admin/users/save}" th:object="${userForm}" method="post" class="vstack gap-3">
+                                <input type="hidden" th:field="*{id}">
+                                <div><label class="form-label">Họ tên</label><input th:field="*{fullName}" class="form-control"></div>
+                                <div><label class="form-label">Email</label><input th:field="*{email}" class="form-control"></div>
+                                <div><label class="form-label">Số điện thoại</label><input th:field="*{phone}" class="form-control"></div>
+                                <div>
+                                    <label class="form-label">Vai trò</label>
+                                    <select multiple th:field="*{roleNames}" class="form-select multi-select">
+                                        <option th:each="role : ${roles}" th:value="${role.name}" th:text="${role.name}"></option>
+                                    </select>
+                                </div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" th:field="*{enabled}"><label class="form-check-label">Kích hoạt tài khoản</label></div>
+                                <button class="btn btn-accent" th:disabled="${userForm.id == null}">Lưu thay đổi</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-xl-8">
+                        <div class="glass-panel">
+                            <h1 class="h4 text-white mb-3">Danh sách người dùng & số dư ví</h1>
+                            <div class="table-responsive">
+                                <table class="table table-dark align-middle mb-0">
+                                    <thead>
+                                    <tr>
+                                        <th>Người dùng</th>
+                                        <th>Roles</th>
+                                        <th>Số dư</th>
+                                        <th>Điều chỉnh ví</th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="user : ${users}">
+                                        <td>
+                                            <div class="fw-semibold" th:text="${user.fullName}">Name</div>
+                                            <div class="small text-secondary" th:text="${user.email}">email</div>
+                                            <div class="small text-secondary">Kích hoạt: <span th:text="${user.enabled ? 'Có' : 'Không'}">Có</span></div>
+                                        </td>
+                                        <td th:text="${#strings.listJoin(user.roles.![name], ', ')}">ROLE_USER</td>
+                                        <td>
+                                            <div class="fw-semibold text-accent" th:text="${#numbers.formatDecimal(user.wallet != null ? user.wallet.balance : 0, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                                        </td>
+                                        <td style="min-width: 320px;">
+                                            <form th:action="@{/admin/users/{userId}/wallet-adjust(userId=${user.id})}" method="post" class="row g-2">
+                                                <div class="col-4"><input type="number" min="0.01" step="any" inputmode="decimal" name="amount" class="form-control" placeholder="Số tiền" required></div>
+                                                <div class="col-3">
+                                                    <select name="action" class="form-select" required>
+                                                        <option value="ADD">Cộng</option>
+                                                        <option value="SUBTRACT">Trừ</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-5"><input type="text" name="note" class="form-control" placeholder="Ghi chú"></div>
+                                                <div class="col-12 d-grid"><button class="btn btn-sm btn-outline-light">Xác nhận</button></div>
+                                            </form>
+                                        </td>
+                                        <td><a class="btn btn-sm btn-outline-light" th:href="@{/admin/users/{userId}/edit(userId=${user.id})}">Chỉnh sửa</a></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

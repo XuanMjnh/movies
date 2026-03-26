@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Hồ sơ cá nhân')}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div th:replace="~{fragments/alerts :: alerts}"></div>
+<main class="container-xxl py-4">
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="glass-panel text-center">
+                <img th:src="${loggedInUser.avatarUrl != null ? loggedInUser.avatarUrl : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&auto=format&fit=crop&q=60'}" class="profile-avatar mb-3" alt="avatar">
+                <h3 class="text-white" th:text="${loggedInUser.fullName}">User</h3>
+                <p class="text-secondary" th:text="${loggedInUser.email}">email</p>
+                <div class="pill-dark d-inline-flex">Gói hiện tại: <span class="ms-2 text-accent" th:text="${currentAccessLevel}">FREE</span></div>
+                <div class="small text-secondary mt-3" th:if="${activeSubscription != null}">Còn <span th:text="${remainingDays}">0</span> ngày hiệu lực</div>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <div class="glass-panel mb-4">
+                <h2 class="h4 text-white mb-3">Cập nhật hồ sơ</h2>
+                <form th:action="@{/user/profile}" th:object="${profileUpdateRequest}" method="post" enctype="multipart/form-data" class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Họ tên</label>
+                        <input th:field="*{fullName}" class="form-control">
+                        <div class="invalid-feedback d-block" th:errors="*{fullName}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input th:field="*{email}" class="form-control">
+                        <div class="invalid-feedback d-block" th:errors="*{email}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Số điện thoại</label>
+                        <input th:field="*{phone}" class="form-control">
+                        <div class="invalid-feedback d-block" th:errors="*{phone}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Ảnh đại diện</label>
+                        <input type="file" th:field="*{avatarFile}" class="form-control">
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-accent">Lưu hồ sơ</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="glass-panel">
+                <h2 class="h4 text-white mb-3">Đổi mật khẩu</h2>
+                <form th:action="@{/user/change-password}" th:object="${passwordChangeRequest}" method="post" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Mật khẩu hiện tại</label>
+                        <input type="password" th:field="*{currentPassword}" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Mật khẩu mới</label>
+                        <input type="password" th:field="*{newPassword}" class="form-control">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Xác nhận mật khẩu</label>
+                        <input type="password" th:field="*{confirmPassword}" class="form-control">
+                    </div>
+                    <div class="col-12">
+                        <button class="btn btn-outline-light">Đổi mật khẩu</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

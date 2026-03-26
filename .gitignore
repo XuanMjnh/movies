@@ -1,0 +1,51 @@
+# Maven / Java build output
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+logs/
+
+# Spring Boot runtime files
+*.pid
+*.pid.lock
+*.seed
+*.out
+*.err
+
+# Local environment and secrets
+.env
+.env.*
+application-local.properties
+application-dev.properties
+application-secrets.properties
+src/main/resources/application-local.properties
+src/main/resources/application-dev.properties
+src/main/resources/application-secrets.properties
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local uploads / generated assets
+# uploads/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+
+# Test / coverage outputs
+coverage/
+.nyc_output/

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer" class="app-footer mt-5">
+    <div class="container-fluid container-stream py-5">
+        <div class="row g-4">
+            <div class="col-lg-5">
+                <h4 class="fw-bold text-white">RoStream</h4>
+                <p class="text-secondary mb-0">Giao diện streaming kiểu dark-cinema, full width, tối ưu cho duyệt phim, xem phim, ví tiền và gói thành viên trong Spring Boot MVC + Thymeleaf.</p>
+            </div>
+            <div class="col-lg-3">
+                <h6 class="text-white">Khám phá</h6>
+                <ul class="list-unstyled footer-links">
+                    <li><a th:href="@{/movies}">Danh sách phim</a></li>
+                    <li><a th:href="@{/subscription/plans}">Bảng giá</a></li>
+                    <li><a th:href="@{/user/wallet}">Ví tiền</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-4">
+                <h6 class="text-white">Demo test nhanh</h6>
+                <p class="text-secondary mb-1">admin@example.com / admin123</p>
+                <p class="text-secondary mb-0">user@example.com / user123</p>
+            </div>
+        </div>
+        <hr class="border-secondary-subtle my-4">
+        <div class="d-flex justify-content-between flex-wrap gap-2 text-secondary small">
+            <span>© <span th:text="${currentYear}">2026</span> RoStream</span>
+            <span>Java 17 • Spring Boot • Thymeleaf • MySQL</span>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

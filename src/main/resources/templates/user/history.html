@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Lịch sử xem')}"></head>
+<body>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<div th:replace="~{fragments/alerts :: alerts}"></div>
+<main class="container-fluid container-stream py-4 py-lg-5">
+    <section class="section-shell">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div>
+                <p class="eyebrow mb-2">Theo dõi tiến độ</p>
+                <h1 class="section-title mb-1">Lịch sử xem & tiếp tục xem</h1>
+                <p class="section-subtitle mb-0">Theo dõi tiến độ xem gần nhất theo từng tập.</p>
+            </div>
+            <form th:action="@{/user/history/clear}" method="post" th:if="${histories != null and !#lists.isEmpty(histories)}">
+                <button class="btn btn-outline-danger">Xóa toàn bộ</button>
+            </form>
+        </div>
+
+        <div class="vstack gap-3" th:if="${histories != null and !#lists.isEmpty(histories)}">
+            <th:block th:each="history : ${histories}">
+                <div class="glass-panel history-panel d-flex flex-column flex-lg-row gap-3 align-items-lg-center" th:if="${history != null and history.movie != null and history.episode != null}" th:with="poster=${history.movie.posterUrl != null and !history.movie.posterUrl.isBlank() ? history.movie.posterUrl : '/images/default-poster.svg'}, durationSeconds=${history.episode.durationMinutes != null ? history.episode.durationMinutes * 60 : 0}, watchedSeconds=${history.lastPositionSeconds != null ? history.lastPositionSeconds : 0}, progress=${durationSeconds > 0 ? T(java.lang.Math).min(100, (watchedSeconds * 100) / durationSeconds) : 0}">
+                    <img th:src="${poster}" class="history-thumb" th:alt="${history.movie.title != null ? history.movie.title : 'Movie'}">
+                    <div class="flex-grow-1">
+                        <h4 class="text-white mb-1" th:text="${history.movie.title != null ? history.movie.title : 'Đang cập nhật'}">Movie</h4>
+                        <div class="text-secondary small mb-2">Tập <span th:text="${history.episode.episodeNumber != null ? history.episode.episodeNumber : '?'}">1</span> - <span th:text="${history.episode.title != null ? history.episode.title : 'Đang cập nhật'}">Title</span></div>
+                        <div class="text-secondary small mb-3">Lần xem gần nhất: <span th:text="${history.lastWatchedAt != null ? #temporals.format(history.lastWatchedAt, 'dd/MM/yyyy HH:mm') : '--/--/---- --:--'}">17/03/2026</span></div>
+                        <div class="progress bg-black mb-3" style="height:8px;">
+                            <div class="progress-bar" role="progressbar" th:style="|width:${progress}%|"></div>
+                        </div>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a class="btn btn-accent btn-sm" th:href="@{/movies/{movieId}/watch(movieId=${history.movie.id}, episodeId=${history.episode.id})}">Tiếp tục xem</a>
+                            <a class="btn btn-surface-outline btn-sm" th:href="@{/movies/{id}(id=${history.movie.id})}">Chi tiết</a>
+                        </div>
+                    </div>
+                    <form th:action="@{/user/history/delete/{historyId}(historyId=${history.id})}" method="post">
+                        <button class="btn btn-outline-danger btn-sm">Xóa</button>
+                    </form>
+                </div>
+            </th:block>
+        </div>
+
+        <div th:if="${histories == null or #lists.isEmpty(histories)}" class="glass-panel text-center py-5">
+            <i class="bi bi-clock-history fs-1 text-accent"></i>
+            <h3 class="text-white mt-3">Bạn chưa có lịch sử xem</h3>
+            <a class="btn btn-accent mt-3" th:href="@{/movies}">Bắt đầu xem phim</a>
+        </div>
+    </section>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

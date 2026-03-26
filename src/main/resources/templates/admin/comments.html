@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Quản lý bình luận')}"></head>
+<body>
+<div class="container-fluid admin-shell">
+    <div class="row g-0 min-vh-100">
+        <div class="col-xl-2 col-lg-3 d-none d-lg-block">
+            <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+        </div>
+        <div class="col-xl-10 col-lg-9">
+            <div class="p-4 p-lg-5">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="glass-panel">
+                    <h1 class="h4 text-white mb-3">Kiểm duyệt bình luận</h1>
+                    <div class="table-responsive">
+                        <table class="table table-dark align-middle mb-0">
+                            <thead>
+                            <tr><th>User</th><th>Movie</th><th>Nội dung</th><th>Ẩn</th><th></th></tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="comment : ${comments}" th:if="${comment != null}">
+                                <td th:text="${comment.user != null and comment.user.email != null ? comment.user.email : 'N/A'}">user</td>
+                                <td th:text="${comment.movie != null and comment.movie.title != null ? comment.movie.title : 'N/A'}">movie</td>
+                                <td style="max-width:420px" th:text="${comment.content != null ? comment.content : ''}">content</td>
+                                <td th:text="${comment.hidden}">false</td>
+                                <td>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <form th:action="@{/admin/comments/{commentId}/toggle(commentId=${comment.id})}" method="post">
+                                            <button class="btn btn-sm btn-outline-light" th:text="${comment.hidden ? 'Hiện' : 'Ẩn'}">Ẩn</button>
+                                        </form>
+                                        <form th:action="@{/admin/comments/{commentId}/delete(commentId=${comment.id})}" method="post">
+                                            <button class="btn btn-sm btn-outline-danger">Xóa</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Quản lý gói thành viên')}"></head>
+<body>
+<div class="container-fluid admin-shell">
+    <div class="row g-0 min-vh-100">
+        <div class="col-xl-2 col-lg-3 d-none d-lg-block">
+            <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+        </div>
+        <div class="col-xl-10 col-lg-9">
+            <div class="p-4 p-lg-5">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="row g-4">
+                    <div class="col-xl-5">
+                        <div class="glass-panel">
+                            <h1 class="h4 text-white mb-3">Thêm / sửa gói</h1>
+                            <form th:action="@{/admin/plans/save}" th:object="${planForm}" method="post" class="vstack gap-3">
+                                <input type="hidden" th:field="*{id}">
+                                <div><label class="form-label">Tên gói</label><input th:field="*{name}" class="form-control"></div>
+                                <div><label class="form-label">Access level</label><select th:field="*{accessLevel}" class="form-select"><option th:each="level : ${T(com.streaming.movieplatform.enums.AccessLevel).values()}" th:value="${level}" th:text="${level}"></option></select></div>
+                                <div class="row g-3"><div class="col-md-6"><label class="form-label">Giá</label><input type="number" th:field="*{price}" class="form-control"></div><div class="col-md-6"><label class="form-label">Số ngày</label><input type="number" th:field="*{durationDays}" class="form-control"></div></div>
+                                <div><label class="form-label">Tính năng (ngăn cách bởi ; )</label><textarea th:field="*{featureDescription}" class="form-control" rows="4"></textarea></div>
+                                <div class="form-check"><input class="form-check-input" type="checkbox" th:field="*{active}"><label class="form-check-label">Active</label></div>
+                                <button class="btn btn-accent">Lưu gói</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-xl-7">
+                        <div class="glass-panel">
+                            <h1 class="h4 text-white mb-3">Danh sách gói</h1>
+                            <div class="table-responsive"><table class="table table-dark align-middle mb-0"><thead><tr><th>Gói</th><th>Giá</th><th>Ngày</th><th>Active</th><th></th></tr></thead><tbody><tr th:each="plan : ${plans}"><td><div class="fw-semibold" th:text="${plan.name}">Free</div><div class="small text-secondary" th:text="${plan.accessLevel}">FREE</div></td><td th:text="${#numbers.formatDecimal(plan.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td><td th:text="${plan.durationDays}">30</td><td th:text="${plan.active}">true</td><td><div class="d-flex gap-2 justify-content-end"><a class="btn btn-sm btn-outline-light" th:href="@{/admin/plans/{planId}/edit(planId=${plan.id})}">Sửa</a><form th:action="@{/admin/plans/{planId}/delete(planId=${plan.id})}" method="post"><button class="btn btn-sm btn-outline-danger">Xóa</button></form></div></td></tr></tbody></table></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

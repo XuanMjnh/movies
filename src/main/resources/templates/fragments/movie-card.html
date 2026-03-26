@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="movieCard(movie)" class="col" th:if="${movie != null}">
+    <article class="card movie-card h-100 border-0" th:with="poster=${movie.posterUrl != null and !movie.posterUrl.isBlank() ? movie.posterUrl : '/images/default-poster.svg'}">
+        <div class="movie-poster-wrapper">
+            <img th:src="${poster}" class="card-img-top movie-poster" th:alt="${movie.title != null ? movie.title : 'Movie poster'}">
+            <div class="movie-badges">
+                <span class="badge badge-soft" th:text="${movie.movieType != null ? movie.movieType : 'MOVIE'}">MOVIE</span>
+                <span class="badge badge-rating"><i class="bi bi-star-fill"></i><span th:text="${movie.averageRating != null ? movie.averageRating : 0}">0</span></span>
+            </div>
+            <div class="movie-overlay d-flex flex-column justify-content-end">
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                    <a class="btn btn-sm btn-accent" th:href="@{/movies/{id}/watch(id=${movie.id})}"><i class="bi bi-play-fill me-1"></i>Xem ngay</a>
+                    <a class="btn btn-sm btn-surface-outline" th:href="@{/movies/{id}(id=${movie.id})}">Chi tiết</a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body px-0 pb-0 pt-3">
+            <div class="movie-meta-line mb-2">
+                <span th:text="${movie.releaseYear != null ? movie.releaseYear : 'N/A'}">2025</span>
+                <span>•</span>
+                <span th:text="${movie.country != null and movie.country.name != null ? movie.country.name : 'Đang cập nhật'}">USA</span>
+                <span>•</span>
+                <span class="text-accent-soft" th:text="${movie.accessLevel != null ? movie.accessLevel : 'FREE'}">FREE</span>
+            </div>
+            <h6 class="movie-title mb-1" th:text="${movie.title != null ? movie.title : 'Đang cập nhật'}">Movie title</h6>
+            <div class="small text-secondary text-truncate-2" th:text="${movie.shortDescription != null and !movie.shortDescription.isBlank() ? movie.shortDescription : 'Nội dung phim đang được cập nhật.'}">Short description</div>
+        </div>
+    </article>
+</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+<aside th:fragment="sidebar" class="admin-sidebar p-3 h-100">
+    <a class="navbar-brand d-flex align-items-center gap-2 mb-4 text-decoration-none text-white" th:href="@{/admin}">
+        <span class="brand-logo">A</span>
+        <span>Admin Studio</span>
+    </a>
+    <nav class="nav flex-column gap-1 admin-nav">
+        <a class="nav-link" th:href="@{/admin}"><i class="bi bi-grid"></i> Dashboard</a>
+        <a class="nav-link" th:href="@{/admin/movies}"><i class="bi bi-film"></i> Quản lý phim</a>
+        <a class="nav-link" th:href="@{/admin/users}"><i class="bi bi-people"></i> Người dùng</a>
+        <a class="nav-link" th:href="@{/admin/vouchers}"><i class="bi bi-ticket-perforated"></i> Voucher</a>
+        <a class="nav-link" th:href="@{/admin/genres}"><i class="bi bi-tags"></i> Thể loại</a>
+        <a class="nav-link" th:href="@{/admin/plans}"><i class="bi bi-award"></i> Gói thành viên</a>
+        <a class="nav-link" th:href="@{/admin/banners}"><i class="bi bi-images"></i> Banner</a>
+        <a class="nav-link" th:href="@{/admin/comments}"><i class="bi bi-chat-square-text"></i> Bình luận</a>
+        <a class="nav-link" th:href="@{/admin/transactions}"><i class="bi bi-wallet2"></i> Giao dịch</a>
+        <a class="nav-link" th:href="@{/}"><i class="bi bi-box-arrow-up-right"></i> Về website</a>
+    </nav>
+</aside>
+</body>
+</html>

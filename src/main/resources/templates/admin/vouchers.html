@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Quản lý voucher')}"></head>
+<body>
+<div class="container-fluid admin-shell">
+    <div class="row g-0 min-vh-100">
+        <div class="col-xl-2 col-lg-3 d-none d-lg-block">
+            <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+        </div>
+        <div class="col-xl-10 col-lg-9">
+            <div class="p-4 p-lg-5">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="row g-4">
+                    <div class="col-xl-5">
+                        <div class="glass-panel h-100">
+                            <h1 class="h4 text-white mb-3">Tạo / cập nhật voucher</h1>
+                            <form th:action="@{/admin/vouchers/save}" th:object="${voucherForm}" method="post" class="vstack gap-3">
+                                <input type="hidden" th:field="*{id}">
+                                <div><label class="form-label">Mã voucher</label><input th:field="*{code}" class="form-control" placeholder="VD: GIAM50"></div>
+                                <div><label class="form-label">Tên voucher</label><input th:field="*{name}" class="form-control"></div>
+                                <div><label class="form-label">Mô tả</label><textarea th:field="*{description}" class="form-control" rows="2"></textarea></div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Loại giảm</label>
+                                        <select th:field="*{discountType}" class="form-select">
+                                            <option value="PERCENT">Phần trăm</option>
+                                            <option value="FIXED_AMOUNT">Số tiền cố định</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6"><label class="form-label">Giá trị giảm</label><input th:field="*{discountValue}" type="number" step="0.01" class="form-control"></div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6"><label class="form-label">Giảm tối đa</label><input th:field="*{maxDiscountAmount}" type="number" step="0.01" class="form-control" placeholder="Để trống nếu không giới hạn"></div>
+                                    <div class="col-md-6"><label class="form-label">Đơn tối thiểu</label><input th:field="*{minOrderAmount}" type="number" step="0.01" class="form-control"></div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6"><label class="form-label">Số lượng</label><input th:field="*{quantity}" type="number" min="0" class="form-control"></div>
+                                    <div class="col-md-6 d-flex align-items-end"><div class="form-check mb-2"><input class="form-check-input" type="checkbox" th:field="*{active}"><label class="form-check-label">Kích hoạt voucher</label></div></div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6"><label class="form-label">Bắt đầu</label><input th:field="*{startAt}" type="datetime-local" class="form-control"></div>
+                                    <div class="col-md-6"><label class="form-label">Kết thúc</label><input th:field="*{endAt}" type="datetime-local" class="form-control"></div>
+                                </div>
+                                <button class="btn btn-accent">Lưu voucher</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="col-xl-7">
+                        <div class="glass-panel">
+                            <h1 class="h4 text-white mb-3">Danh sách voucher</h1>
+                            <div class="table-responsive">
+                                <table class="table table-dark align-middle mb-0">
+                                    <thead><tr><th>Voucher</th><th>Giảm giá</th><th>Thời hạn</th><th>Số lượng</th><th></th></tr></thead>
+                                    <tbody>
+                                    <tr th:each="voucher : ${vouchers}">
+                                        <td>
+                                            <div class="fw-semibold" th:text="${voucher.code}">GIAM50</div>
+                                            <div class="small text-secondary" th:text="${voucher.name}">Tên</div>
+                                            <div class="small text-secondary" th:text="${voucher.active ? 'Đang bật' : 'Đang tắt'}">Đang bật</div>
+                                        </td>
+                                        <td>
+                                            <div th:text="${voucher.discountType.name() == 'PERCENT' ? (#numbers.formatDecimal(voucher.discountValue, 0, 'COMMA', 0, 'POINT') + '%') : (#numbers.formatDecimal(voucher.discountValue, 0, 'COMMA', 0, 'POINT') + ' đ')}">10%</div>
+                                            <div class="small text-secondary">Đơn tối thiểu: <span th:text="${#numbers.formatDecimal(voucher.minOrderAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span></div>
+                                        </td>
+                                        <td>
+                                            <div class="small" th:text="|${#temporals.format(voucher.startAt, 'dd/MM/yyyy HH:mm')} → ${#temporals.format(voucher.endAt, 'dd/MM/yyyy HH:mm')}|">date</div>
+                                        </td>
+                                        <td>
+                                            <div><span th:text="${voucher.usedCount}">0</span> / <span th:text="${voucher.quantity}">0</span></div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <a class="btn btn-sm btn-outline-light" th:href="@{/admin/vouchers/{voucherId}/edit(voucherId=${voucher.id})}">Sửa</a>
+                                                <form th:action="@{/admin/vouchers/{voucherId}/delete(voucherId=${voucher.id})}" method="post">
+                                                    <button class="btn btn-sm btn-outline-danger">Xóa</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

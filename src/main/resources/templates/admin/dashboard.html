@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Admin Dashboard')}"></head>
+<body>
+<div class="container-fluid admin-shell">
+    <div class="row g-0 min-vh-100">
+        <div class="col-xl-2 col-lg-3 d-none d-lg-block">
+            <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+        </div>
+        <div class="col-xl-10 col-lg-9">
+            <div class="p-4 p-lg-5">
+                <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                    <div>
+                        <h1 class="fw-bold text-white mb-1">Dashboard</h1>
+                        <p class="text-secondary mb-0">Tổng quan người dùng, doanh thu, giao dịch và hiệu quả nội dung trên hệ thống.</p>
+                    </div>
+                    <a class="btn btn-outline-light" th:href="@{/}">Mở website</a>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6 col-xl-3"><div class="dashboard-card"><span>Total Users</span><h3 th:text="${stats.totalUsers}">0</h3></div></div>
+                    <div class="col-md-6 col-xl-3"><div class="dashboard-card"><span>Total Movies</span><h3 th:text="${stats.totalMovies}">0</h3></div></div>
+                    <div class="col-md-6 col-xl-3"><div class="dashboard-card"><span>Total Comments</span><h3 th:text="${stats.totalComments}">0</h3></div></div>
+                    <div class="col-md-6 col-xl-3"><div class="dashboard-card"><span>Total Views</span><h3 th:text="${stats.totalViewCount}">0</h3></div></div>
+                    <div class="col-md-6 col-xl-3"><div class="dashboard-card"><span>Tổng doanh thu</span><h3 th:text="${#numbers.formatDecimal(stats.walletRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</h3></div></div>
+                    <div class="col-md-6 col-xl-3"><div class="dashboard-card"><span>Doanh thu hôm nay</span><h3 th:text="${#numbers.formatDecimal(stats.revenueToday, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</h3></div></div>
+                    <div class="col-md-6 col-xl-3"><div class="dashboard-card"><span>Doanh thu tháng này</span><h3 th:text="${#numbers.formatDecimal(stats.revenueThisMonth, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</h3></div></div>
+                    <div class="col-md-6 col-xl-3"><div class="dashboard-card"><span>Active Subscriptions</span><h3 th:text="${stats.activeSubscriptions}">0</h3></div></div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-12">
+                        <div class="glass-panel chart-panel">
+                            <div class="chart-panel__header">
+                                <div>
+                                    <h3 class="h5 text-white mb-1">Doanh thu 7 ngày gần nhất</h3>
+                                    <p class="text-secondary mb-0">Theo dõi biến động doanh thu subscription theo ngày.</p>
+                                </div>
+                                <span class="chart-pill">7 ngày</span>
+                            </div>
+                            <div class="chart-canvas-wrap chart-canvas-wrap--hero">
+                                <canvas id="dailyRevenueChart"></canvas>
+                            </div>
+                            <div class="chart-summary-grid">
+                                <div class="chart-summary-item" th:each="item : ${dailyRevenue}">
+                                    <span th:text="${item.periodLabel}">25/03/2026</span>
+                                    <strong th:text="${#numbers.formatDecimal(item.revenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-xl-6">
+                        <div class="glass-panel chart-panel h-100">
+                            <div class="chart-panel__header">
+                                <div>
+                                    <h3 class="h5 text-white mb-1">Doanh thu 6 tháng gần nhất</h3>
+                                    <p class="text-secondary mb-0">So sánh doanh thu theo chu kỳ tháng.</p>
+                                </div>
+                                <span class="chart-pill">6 tháng</span>
+                            </div>
+                            <div class="chart-canvas-wrap">
+                                <canvas id="monthlyRevenueChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6">
+                        <div class="glass-panel chart-panel h-100">
+                            <div class="chart-panel__header">
+                                <div>
+                                    <h3 class="h5 text-white mb-1">Cơ cấu nội dung</h3>
+                                    <p class="text-secondary mb-0">Tỷ lệ phim lẻ và phim bộ hiện có trên hệ thống.</p>
+                                </div>
+                                <span class="chart-pill">Content</span>
+                            </div>
+                            <div class="chart-canvas-wrap">
+                                <canvas id="movieTypeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-12">
+                        <div class="glass-panel chart-panel">
+                            <div class="chart-panel__header">
+                                <div>
+                                    <h3 class="h5 text-white mb-1">Top phim có lượt xem cao</h3>
+                                    <p class="text-secondary mb-0">Những nội dung đang tạo ra nhiều lượt xem nhất.</p>
+                                </div>
+                                <span class="chart-pill">Top 5</span>
+                            </div>
+                            <div class="chart-canvas-wrap">
+                                <canvas id="topViewedMoviesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-xl-6">
+                        <div class="glass-panel h-100">
+                            <h3 class="h5 text-white mb-3">Giao dịch gần đây</h3>
+                            <div class="table-responsive">
+                                <table class="table table-dark align-middle mb-0">
+                                    <thead><tr><th>User</th><th>Loại</th><th>Số tiền</th><th>Thời gian</th></tr></thead>
+                                    <tbody>
+                                    <tr th:each="tx : ${latestTransactions}">
+                                        <td th:text="${tx.user.email}">user</td>
+                                        <td>
+                                            <div th:text="${tx.type}">DEPOSIT</div>
+                                            <div class="small text-secondary" th:text="${tx.description}">Mô tả</div>
+                                        </td>
+                                        <td th:text="${#numbers.formatDecimal(tx.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
+                                        <td th:text="${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm')}">time</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-6">
+                        <div class="glass-panel h-100">
+                            <h3 class="h5 text-white mb-3">Lịch sử gói gần đây</h3>
+                            <div class="table-responsive">
+                                <table class="table table-dark align-middle mb-0">
+                                    <thead><tr><th>User</th><th>Plan</th><th>Trạng thái</th><th>Hiệu lực</th></tr></thead>
+                                    <tbody>
+                                    <tr th:each="item : ${latestSubscriptions}">
+                                        <td th:text="${item.user.email}">user</td>
+                                        <td th:text="${item.plan.name}">Premium</td>
+                                        <td th:text="${item.status}">ACTIVE</td>
+                                        <td th:text="${item.startDate + ' → ' + item.endDate}">date</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    const dailyRevenue = /*[[${dailyRevenue}]]*/ [];
+    const monthlyRevenue = /*[[${monthlyRevenue}]]*/ [];
+    const movieTypeStats = /*[[${movieTypeStats}]]*/ [];
+    const topViewedMovies = /*[[${topViewedMovies}]]*/ [];
+
+    const chartTextColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || '#f5f1e6';
+    const chartMutedColor = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#b8ae96';
+    const chartLineColor = getComputedStyle(document.documentElement).getPropertyValue('--line').trim() || 'rgba(255, 236, 196, 0.10)';
+
+    const formatCurrency = (value) => new Intl.NumberFormat('vi-VN').format(value || 0) + ' đ';
+    const formatCount = (value) => new Intl.NumberFormat('vi-VN').format(value || 0);
+    const toNumber = (value) => Number(value || 0);
+
+    const buildGradient = (canvas, fromColor, toColor) => {
+        const ctx = canvas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height || 320);
+        gradient.addColorStop(0, fromColor);
+        gradient.addColorStop(1, toColor);
+        return gradient;
+    };
+
+    const baseOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: {
+                    color: chartTextColor,
+                    usePointStyle: true,
+                    boxWidth: 10,
+                    padding: 18
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: { color: chartMutedColor },
+                grid: { color: chartLineColor, drawBorder: false }
+            },
+            y: {
+                ticks: {
+                    color: chartMutedColor,
+                    callback: (value) => formatCount(value)
+                },
+                grid: { color: chartLineColor, drawBorder: false }
+            }
+        }
+    };
+
+    const dailyCanvas = document.getElementById('dailyRevenueChart');
+    if (dailyCanvas && dailyRevenue.length) {
+        new Chart(dailyCanvas, {
+            type: 'line',
+            data: {
+                labels: dailyRevenue.map(item => item.periodLabel),
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: dailyRevenue.map(item => toNumber(item.revenue)),
+                    borderColor: '#e4b63f',
+                    backgroundColor: buildGradient(dailyCanvas, 'rgba(228, 182, 63, 0.32)', 'rgba(228, 182, 63, 0.02)'),
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#f4d97a',
+                    pointBorderColor: '#0b0c0f',
+                    borderWidth: 3
+                }]
+            },
+            options: {
+                ...baseOptions,
+                plugins: {
+                    ...baseOptions.plugins,
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => formatCurrency(context.parsed.y)
+                        }
+                    }
+                },
+                scales: {
+                    ...baseOptions.scales,
+                    y: {
+                        ...baseOptions.scales.y,
+                        ticks: {
+                            color: chartMutedColor,
+                            callback: (value) => formatCurrency(value)
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const monthlyCanvas = document.getElementById('monthlyRevenueChart');
+    if (monthlyCanvas && monthlyRevenue.length) {
+        new Chart(monthlyCanvas, {
+            type: 'bar',
+            data: {
+                labels: monthlyRevenue.map(item => item.periodLabel),
+                datasets: [{
+                    label: 'Doanh thu tháng',
+                    data: monthlyRevenue.map(item => toNumber(item.revenue)),
+                    backgroundColor: [
+                        '#f4d97a',
+                        '#efcf66',
+                        '#e9c452',
+                        '#e4b63f',
+                        '#d9a532',
+                        '#c98f28'
+                    ],
+                    borderRadius: 16,
+                    maxBarThickness: 46
+                }]
+            },
+            options: {
+                ...baseOptions,
+                plugins: {
+                    ...baseOptions.plugins,
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => formatCurrency(context.parsed.y)
+                        }
+                    }
+                },
+                scales: {
+                    ...baseOptions.scales,
+                    y: {
+                        ...baseOptions.scales.y,
+                        ticks: {
+                            color: chartMutedColor,
+                            callback: (value) => formatCurrency(value)
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const movieTypeCanvas = document.getElementById('movieTypeChart');
+    if (movieTypeCanvas && movieTypeStats.length) {
+        new Chart(movieTypeCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: movieTypeStats.map(item => item.label),
+                datasets: [{
+                    data: movieTypeStats.map(item => toNumber(item.value)),
+                    backgroundColor: ['#e4b63f', '#5ea8ff'],
+                    borderColor: 'rgba(11, 12, 15, 0.7)',
+                    borderWidth: 4,
+                    hoverOffset: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '62%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: chartTextColor,
+                            usePointStyle: true,
+                            boxWidth: 10,
+                            padding: 18
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${context.label}: ${formatCount(context.parsed)}`
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const topViewedCanvas = document.getElementById('topViewedMoviesChart');
+    if (topViewedCanvas && topViewedMovies.length) {
+        new Chart(topViewedCanvas, {
+            type: 'bar',
+            data: {
+                labels: topViewedMovies.map(item => item.label),
+                datasets: [{
+                    label: 'Lượt xem',
+                    data: topViewedMovies.map(item => toNumber(item.value)),
+                    backgroundColor: buildGradient(topViewedCanvas, 'rgba(94, 168, 255, 0.95)', 'rgba(48, 109, 227, 0.55)'),
+                    borderRadius: 14,
+                    maxBarThickness: 28
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                ...baseOptions,
+                plugins: {
+                    ...baseOptions.plugins,
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `${formatCount(context.parsed.x)} lượt xem`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: chartMutedColor,
+                            callback: (value) => formatCount(value)
+                        },
+                        grid: { color: chartLineColor, drawBorder: false }
+                    },
+                    y: {
+                        ticks: { color: chartMutedColor },
+                        grid: { display: false, drawBorder: false }
+                    }
+                }
+            }
+        });
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

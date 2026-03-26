@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Đăng ký')}"></head>
+<body class="auth-body">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<section class="auth-section">
+    <div class="auth-card auth-card-wide">
+        <div class="text-center mb-4">
+            <h1 class="fw-bold text-white">Tạo tài khoản MovieStream</h1>
+            <p class="text-secondary mb-0">Bắt đầu xem phim, tích ví và nâng cấp gói thành viên.</p>
+        </div>
+        <div th:replace="~{fragments/alerts :: alerts}"></div>
+        <form th:action="@{/register}" th:object="${registerRequest}" method="post" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Họ tên</label>
+                <input th:field="*{fullName}" class="form-control form-control-lg">
+                <div class="invalid-feedback d-block" th:errors="*{fullName}"></div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input th:field="*{email}" class="form-control form-control-lg">
+                <div class="invalid-feedback d-block" th:errors="*{email}"></div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Số điện thoại</label>
+                <input th:field="*{phone}" class="form-control form-control-lg">
+                <div class="invalid-feedback d-block" th:errors="*{phone}"></div>
+            </div>
+            <div class="col-md-6"></div>
+            <div class="col-md-6">
+                <label class="form-label">Mật khẩu</label>
+                <input type="password" th:field="*{password}" class="form-control form-control-lg">
+                <div class="invalid-feedback d-block" th:errors="*{password}"></div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Xác nhận mật khẩu</label>
+                <input type="password" th:field="*{confirmPassword}" class="form-control form-control-lg">
+                <div class="invalid-feedback d-block" th:errors="*{confirmPassword}"></div>
+            </div>
+            <div class="col-12">
+                <button class="btn btn-accent btn-lg w-100">Đăng ký tài khoản</button>
+            </div>
+        </form>
+        <div class="text-center mt-4 text-secondary">Đã có tài khoản? <a th:href="@{/login}" class="text-white text-decoration-none">Đăng nhập ngay</a></div>
+    </div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

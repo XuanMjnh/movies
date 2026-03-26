@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Trang chủ')}"></head>
+<body class="home-page">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+<main class="pb-5">
+    <section class="hero-home" th:if="${banners != null and !#lists.isEmpty(banners)}">
+        <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item hero-banner" th:each="banner, stat : ${banners}" th:classappend="${stat.first} ? ' active'" th:with="heroImage=${banner.imageUrl != null and !banner.imageUrl.isBlank() ? banner.imageUrl : '/images/default-poster.svg'}">
+                    <img th:src="${heroImage}" class="d-block w-100 hero-image" th:alt="${banner.title != null ? banner.title : 'Banner'}">
+                    <div class="hero-gradient"></div>
+                    <div class="container-fluid container-stream hero-caption">
+                        <div class="hero-content">
+                            <p class="eyebrow mb-3">Xem phim online tốc độ cao</p>
+                            <h1 class="hero-title" th:text="${banner.title != null ? banner.title : 'Kho phim mới mỗi ngày'}">Kho phim mới mỗi ngày</h1>
+                            <p class="hero-copy" th:text="${banner.subtitle != null and !banner.subtitle.isBlank() ? banner.subtitle : 'Giao diện dark-cinema, gọn và tối ưu cho trải nghiệm xem phim liên tục.'}">Subtitle</p>
+                            <div class="d-flex gap-3 flex-wrap mt-4">
+                                <a class="btn btn-lg btn-accent" th:href="${banner.ctaLink != null ? banner.ctaLink : '/movies'}" th:text="${banner.ctaText != null ? banner.ctaText : 'Xem ngay'}">Xem ngay</a>
+                                <a class="btn btn-lg btn-surface-outline" th:href="${banner.movie != null ? '/movies/' + banner.movie.id : '/movies'}">Chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container-fluid container-stream mt-4">
+        <div class="category-strip glass-strip">
+            <a class="genre-chip" th:href="@{/movies}">Tất cả</a>
+            <a th:each="genre : ${genres}" class="genre-chip" th:href="@{/movies(genreId=${genre.id})}" th:text="${genre.name}">Action</a>
+        </div>
+    </section>
+
+    <section class="container-fluid container-stream mt-4" th:with="featuredMovies=${sections['featured']}, featuredLimit=6">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow mb-2">Nội dung nổi bật</p>
+                <h2 class="section-title">Xem nhiều và nổi bật</h2>
+                <p class="section-subtitle mb-0">Bố cục ngang, tối ưu cho cảm giác duyệt phim như các web streaming hiện đại.</p>
+            </div>
+            <a th:if="${featuredMovies != null and #lists.size(featuredMovies) > featuredLimit}" th:href="@{/movies}" class="btn btn-surface-outline">Khám phá toàn bộ</a>
+        </div>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-xl-5 row-cols-xxl-6 g-4">
+            <th:block th:each="movie, stat : ${featuredMovies}">
+                <div th:if="${stat.index < featuredLimit}" th:replace="~{fragments/movie-card :: movieCard(movie=${movie})}"></div>
+            </th:block>
+        </div>
+    </section>
+
+    <section class="container-fluid container-stream mt-5"
+             th:if="${sections != null and !#lists.isEmpty(sections['continueWatching'])}"
+             th:with="continueMovies=${sections['continueWatching']}, continueLimit=6">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow mb-2">Dành cho bạn</p>
+                <h2 class="section-title">Tiếp tục xem</h2>
+                <p class="section-subtitle mb-0">Quay lại nhanh đúng nội dung bạn đang theo dõi.</p>
+            </div>
+            <a th:if="${continueMovies != null and #lists.size(continueMovies) > continueLimit}" class="btn btn-surface-outline" th:href="@{/user/history}">Khám phá toàn bộ</a>
+        </div>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-xl-5 row-cols-xxl-6 g-4">
+            <th:block th:each="movie, stat : ${continueMovies}">
+                <div th:if="${stat.index < continueLimit}" th:replace="~{fragments/movie-card :: movieCard(movie=${movie})}"></div>
+            </th:block>
+        </div>
+    </section>
+
+    <section class="container-fluid container-stream mt-5" th:with="latestMovies=${sections['latest']}, latestLimit=5, premiumMovies=${sections['premium']}, premiumLimit=4">
+        <div class="content-grid">
+            <div>
+                <div class="section-head mb-3">
+                    <div>
+                        <p class="eyebrow mb-2">Mới cập nhật</p>
+                        <h2 class="section-title">Phim mới</h2>
+                    </div>
+                    <a th:if="${latestMovies != null and #lists.size(latestMovies) > latestLimit}" class="btn btn-surface-outline" th:href="@{/movies(sortBy='newest')}">Khám phá toàn bộ</a>
+                </div>
+                <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5 g-4">
+                    <th:block th:each="movie, stat : ${latestMovies}">
+                        <div th:if="${stat.index < latestLimit}" th:replace="~{fragments/movie-card :: movieCard(movie=${movie})}"></div>
+                    </th:block>
+                </div>
+            </div>
+            <aside class="glass-panel side-rail">
+                <div class="section-head mb-3">
+                    <h3 class="h5 text-white mb-0">Phim premium</h3>
+                    <a th:if="${premiumMovies != null and #lists.size(premiumMovies) > premiumLimit}" class="btn btn-sm btn-surface-outline" th:href="@{/movies(accessLevel='PREMIUM')}">Khám phá toàn bộ</a>
+                </div>
+                <div class="vstack gap-3">
+                    <a th:each="movie, stat : ${premiumMovies}"
+                       th:if="${stat.index < premiumLimit}"
+                       th:href="@{/movies/{id}(id=${movie.id})}"
+                       class="premium-mini-card text-decoration-none"
+                       th:with="poster=${movie.posterUrl != null and !movie.posterUrl.isBlank() ? movie.posterUrl : '/images/default-poster.svg'}">
+                        <img th:src="${poster}" th:alt="${movie.title != null ? movie.title : 'Movie'}">
+                        <div>
+                            <h6 class="mb-1 text-white" th:text="${movie.title != null ? movie.title : 'Đang cập nhật'}">Movie</h6>
+                            <div class="small text-secondary text-truncate-2" th:text="${movie.shortDescription != null and !movie.shortDescription.isBlank() ? movie.shortDescription : 'Nội dung đang cập nhật.'}">desc</div>
+                        </div>
+                    </a>
+                </div>
+            </aside>
+        </div>
+    </section>
+
+    <section class="container-fluid container-stream mt-5" th:with="popularMovies=${sections['popular']}, popularLimit=6">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow mb-2">Phổ biến</p>
+                <h2 class="section-title">Xem nhiều nhất</h2>
+            </div>
+            <a th:if="${popularMovies != null and #lists.size(popularMovies) > popularLimit}" class="btn btn-surface-outline" th:href="@{/movies(sortBy='popular')}">Khám phá toàn bộ</a>
+        </div>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-xl-5 row-cols-xxl-6 g-4">
+            <th:block th:each="movie, stat : ${popularMovies}">
+                <div th:if="${stat.index < popularLimit}" th:replace="~{fragments/movie-card :: movieCard(movie=${movie})}"></div>
+            </th:block>
+        </div>
+    </section>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
