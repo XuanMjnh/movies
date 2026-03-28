@@ -9,10 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const root = document.documentElement;
     const storageKey = 'rostream-theme';
+    const defaultTheme = 'dark';
     const metaTheme = document.querySelector('meta[name="theme-color"]');
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
-
-    const getSystemTheme = () => mediaQuery.matches ? 'light' : 'dark';
 
     const syncThemeColor = (theme) => {
         if (!metaTheme) return;
@@ -29,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const savedTheme = localStorage.getItem(storageKey);
-    applyTheme(savedTheme || getSystemTheme(), false);
+    applyTheme(savedTheme || defaultTheme, false);
 
     if (savedTheme) {
         localStorage.setItem(storageKey, savedTheme);
@@ -40,13 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const nextTheme = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
             applyTheme(nextTheme);
         });
-    });
-
-    mediaQuery.addEventListener('change', () => {
-        const stored = localStorage.getItem(storageKey);
-        if (!stored) {
-            applyTheme(getSystemTheme(), false);
-        }
     });
 
     const navbar = document.querySelector('.app-navbar');
@@ -63,5 +54,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
         toggleNavbarScrolled();
         window.addEventListener('scroll', toggleNavbarScrolled, { passive: true });
+    }
+
+    const heroCarousel = document.getElementById('heroCarousel');
+    if (heroCarousel && window.bootstrap?.Carousel) {
+        const animateHeroContent = (item) => {
+            if (!item) {
+                return;
+            }
+
+            item.classList.remove('hero-content-animated');
+            void item.offsetWidth;
+            item.classList.add('hero-content-animated');
+        };
+
+        heroCarousel.querySelectorAll('.carousel-item').forEach(item => {
+            item.classList.remove('hero-content-animated');
+        });
+
+        animateHeroContent(heroCarousel.querySelector('.carousel-item.active'));
+
+        const carousel = bootstrap.Carousel.getOrCreateInstance(heroCarousel, {
+            interval: 7000,
+            ride: 'carousel',
+            pause: false,
+            touch: true,
+            wrap: true
+        });
+
+        heroCarousel.addEventListener('slide.bs.carousel', event => {
+            heroCarousel.querySelectorAll('.carousel-item.hero-content-animated').forEach(item => {
+                item.classList.remove('hero-content-animated');
+            });
+            animateHeroContent(event.relatedTarget);
+        });
+
+        carousel.cycle();
     }
 });

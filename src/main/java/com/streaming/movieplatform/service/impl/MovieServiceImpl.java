@@ -16,6 +16,8 @@ import com.streaming.movieplatform.entity.WatchHistory;
 import com.streaming.movieplatform.exception.BusinessException;
 import com.streaming.movieplatform.exception.ResourceNotFoundException;
 import com.streaming.movieplatform.repository.ActorRepository;
+import com.streaming.movieplatform.repository.BannerRepository;
+import com.streaming.movieplatform.repository.CommentRepository;
 import com.streaming.movieplatform.repository.CountryRepository;
 import com.streaming.movieplatform.repository.DirectorRepository;
 import com.streaming.movieplatform.repository.EpisodeRepository;
@@ -25,7 +27,6 @@ import com.streaming.movieplatform.repository.MovieRepository;
 import com.streaming.movieplatform.repository.RatingRepository;
 import com.streaming.movieplatform.repository.WatchHistoryRepository;
 import com.streaming.movieplatform.service.MovieService;
-import com.streaming.movieplatform.service.StorageService;
 import com.streaming.movieplatform.service.UserService;
 import com.streaming.movieplatform.util.SlugUtil;
 import org.springframework.data.domain.Page;
@@ -55,34 +56,36 @@ public class MovieServiceImpl implements MovieService {
     private final CountryRepository countryRepository;
     private final ActorRepository actorRepository;
     private final DirectorRepository directorRepository;
+    private final BannerRepository bannerRepository;
+    private final CommentRepository commentRepository;
     private final FavoriteRepository favoriteRepository;
     private final WatchHistoryRepository watchHistoryRepository;
     private final RatingRepository ratingRepository;
     private final UserService userService;
-    private final StorageService storageService;
-
     public MovieServiceImpl(MovieRepository movieRepository,
                             EpisodeRepository episodeRepository,
                             GenreRepository genreRepository,
                             CountryRepository countryRepository,
                             ActorRepository actorRepository,
                             DirectorRepository directorRepository,
+                            BannerRepository bannerRepository,
+                            CommentRepository commentRepository,
                             FavoriteRepository favoriteRepository,
                             WatchHistoryRepository watchHistoryRepository,
                             RatingRepository ratingRepository,
-                            UserService userService,
-                            StorageService storageService) {
+                            UserService userService) {
         this.movieRepository = movieRepository;
         this.episodeRepository = episodeRepository;
         this.genreRepository = genreRepository;
         this.countryRepository = countryRepository;
         this.actorRepository = actorRepository;
         this.directorRepository = directorRepository;
+        this.bannerRepository = bannerRepository;
+        this.commentRepository = commentRepository;
         this.favoriteRepository = favoriteRepository;
         this.watchHistoryRepository = watchHistoryRepository;
         this.ratingRepository = ratingRepository;
         this.userService = userService;
-        this.storageService = storageService;
     }
 
     @Override
@@ -280,12 +283,12 @@ public class MovieServiceImpl implements MovieService {
         movie.setMovieType(request.getMovieType());
         movie.setAccessLevel(request.getAccessLevel());
         movie.setCountry(country);
-        movie.setTrailerUrl(request.getTrailerUrl());
+        movie.setTrailerUrl(normalizeUrl(request.getTrailerUrl()));
         movie.setFeatured(request.isFeatured());
         movie.setPopular(request.isPopular());
         movie.setActive(request.isActive());
-        movie.setPosterUrl(storageService.store(request.getPosterFile(), "posters", request.getExistingPosterUrl()));
-        movie.setBackdropUrl(storageService.store(request.getBackdropFile(), "backdrops", request.getExistingBackdropUrl()));
+        movie.setPosterUrl(normalizeUrl(request.getPosterUrl()));
+        movie.setBackdropUrl(normalizeUrl(request.getBackdropUrl()));
 
         Set<Genre> genres = new HashSet<>(
         genreRepository.findAllById(request.getGenreIds() == null ? List.of() : request.getGenreIds())
@@ -335,11 +338,17 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public void deleteMovie(Long movieId) {
+        watchHistoryRepository.deleteByMovieId(movieId);
+        favoriteRepository.deleteByMovieId(movieId);
+        ratingRepository.deleteByMovieId(movieId);
+        commentRepository.deleteByMovieId(movieId);
+        bannerRepository.deleteByMovieId(movieId);
         movieRepository.deleteById(movieId);
     }
 
     @Override
     public void deleteEpisode(Long episodeId) {
+        watchHistoryRepository.deleteByEpisodeId(episodeId);
         episodeRepository.deleteById(episodeId);
     }
 
@@ -386,5 +395,13 @@ public class MovieServiceImpl implements MovieService {
 
     private String normalizeName(String value) {
         return value == null ? "" : value.trim().replaceAll("\\s+", " ");
+    }
+
+    private String normalizeUrl(String value) {
+        if (value == null) {
+            return null;
+        }
+        String normalized = value.trim();
+        return normalized.isEmpty() ? null : normalized;
     }
 }

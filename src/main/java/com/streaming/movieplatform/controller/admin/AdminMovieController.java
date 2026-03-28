@@ -75,8 +75,8 @@ public class AdminMovieController {
         request.setMovieType(movie.getMovieType());
         request.setAccessLevel(movie.getAccessLevel());
         request.setTrailerUrl(movie.getTrailerUrl());
-        request.setExistingPosterUrl(movie.getPosterUrl());
-        request.setExistingBackdropUrl(movie.getBackdropUrl());
+        request.setPosterUrl(movie.getPosterUrl());
+        request.setBackdropUrl(movie.getBackdropUrl());
         request.setFeatured(movie.isFeatured());
         request.setPopular(movie.isPopular());
         request.setActive(movie.isActive());

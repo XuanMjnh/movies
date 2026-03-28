@@ -3,29 +3,62 @@
 <body>
 <footer th:fragment="footer" class="app-footer mt-5">
     <div class="container-fluid container-stream py-5">
-        <div class="row g-4">
-            <div class="col-lg-5">
-                <h4 class="fw-bold text-white">RoStream</h4>
-                <p class="text-secondary mb-0">Giao diện streaming kiểu dark-cinema, full width, tối ưu cho duyệt phim, xem phim, ví tiền và gói thành viên trong Spring Boot MVC + Thymeleaf.</p>
+        <div class="footer-shell">
+            <div class="row g-4 g-xl-5">
+                <div class="col-xl-5">
+                    <a class="footer-brand text-decoration-none" th:href="@{/}">
+                        <span class="brand-logo"><i class="bi bi-play-fill"></i></span>
+                        <span class="brand-name">Best<span class="text-accent">Moives</span></span>
+                    </a>
+                    <p class="footer-copy mb-4">
+                        Nền tảng xem phim phong cách dark-cinema, tối ưu cho trải nghiệm duyệt nhanh,
+                        xem mượt và quản lý gói thành viên trong một giao diện thống nhất.
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="footer-pill">Phim lẻ & phim bộ</span>
+                        <span class="footer-pill">Dark mode mặc định</span>
+                        <span class="footer-pill">Ví tiền & thành viên</span>
+                    </div>
+                </div>
+
+                <div class="col-sm-6 col-xl-2">
+                    <p class="eyebrow mb-3">Khám phá</p>
+                    <ul class="list-unstyled footer-links mb-0">
+                        <li><a th:href="@{/}">Trang chủ</a></li>
+                        <li><a th:href="@{/movies}">Tất cả phim</a></li>
+                        <li><a th:href="@{/movies(movieType='MOVIE')}">Phim lẻ</a></li>
+                        <li><a th:href="@{/movies(movieType='SERIES')}">Phim bộ</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-sm-6 col-xl-2">
+                    <p class="eyebrow mb-3">Tiện ích</p>
+                    <ul class="list-unstyled footer-links mb-0">
+                        <li><a th:href="@{/subscription/plans}">Gói thành viên</a></li>
+                        <li><a th:href="@{/user/wallet}">Ví tiền</a></li>
+                        <li><a th:href="@{/user/history}">Lịch sử xem</a></li>
+                        <li><a th:href="@{/user/favorites}">Yêu thích</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-xl-3">
+                    <div class="footer-panel">
+                        <p class="eyebrow mb-2">Xem ngay</p>
+                        <h5 class="text-white mb-2">Bắt đầu với kho phim được cập nhật liên tục</h5>
+                        <p class="text-secondary mb-3">
+                            Tìm phim theo thể loại, quốc gia hoặc nâng cấp gói để mở rộng trải nghiệm xem.
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a class="btn btn-accent" th:href="@{/movies}">Khám phá phim</a>
+                            <a class="btn btn-surface" th:href="@{/subscription/plans}">Xem gói</a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-lg-3">
-                <h6 class="text-white">Khám phá</h6>
-                <ul class="list-unstyled footer-links">
-                    <li><a th:href="@{/movies}">Danh sách phim</a></li>
-                    <li><a th:href="@{/subscription/plans}">Bảng giá</a></li>
-                    <li><a th:href="@{/user/wallet}">Ví tiền</a></li>
-                </ul>
+
+            <div class="footer-bottom d-flex justify-content-between flex-wrap gap-3">
+                <span>© <span th:text="${currentYear}">2026</span> BestMoives. All rights reserved.</span>
             </div>
-            <div class="col-lg-4">
-                <h6 class="text-white">Demo test nhanh</h6>
-                <p class="text-secondary mb-1">admin@example.com / admin123</p>
-                <p class="text-secondary mb-0">user@example.com / user123</p>
-            </div>
-        </div>
-        <hr class="border-secondary-subtle my-4">
-        <div class="d-flex justify-content-between flex-wrap gap-2 text-secondary small">
-            <span>© <span th:text="${currentYear}">2026</span> RoStream</span>
-            <span>Java 17 • Spring Boot • Thymeleaf • MySQL</span>
         </div>
     </div>
 </footer>

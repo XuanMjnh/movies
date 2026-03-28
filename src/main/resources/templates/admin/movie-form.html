@@ -19,10 +19,8 @@
                     <a class="btn btn-outline-light" th:href="@{/admin/movies}">Quay lại</a>
                 </div>
                 <div class="glass-panel">
-                    <form th:action="@{/admin/movies/save}" th:object="${movieForm}" method="post" enctype="multipart/form-data" class="row g-3">
+                    <form th:action="@{/admin/movies/save}" th:object="${movieForm}" method="post" class="row g-3">
                         <input type="hidden" th:field="*{id}">
-                        <input type="hidden" th:field="*{existingPosterUrl}">
-                        <input type="hidden" th:field="*{existingBackdropUrl}">
                         <div class="col-md-6"><label class="form-label">Tên phim</label><input th:field="*{title}" class="form-control"><div class="invalid-feedback d-block" th:errors="*{title}"></div></div>
                         <div class="col-md-6"><label class="form-label">Tên gốc</label><input th:field="*{originalTitle}" class="form-control"></div>
                         <div class="col-md-8"><label class="form-label">Mô tả ngắn</label><input th:field="*{shortDescription}" class="form-control"><div class="invalid-feedback d-block" th:errors="*{shortDescription}"></div></div>
@@ -37,8 +35,8 @@
                             <input th:field="*{countryName}" class="form-control" placeholder="Ví dụ: Hàn Quốc">
                             <div class="invalid-feedback d-block" th:errors="*{countryName}"></div>
                         </div>
-                        <div class="col-md-6"><label class="form-label">Poster</label><input type="file" th:field="*{posterFile}" class="form-control"></div>
-                        <div class="col-md-6"><label class="form-label">Backdrop</label><input type="file" th:field="*{backdropFile}" class="form-control"></div>
+                        <div class="col-md-6"><label class="form-label">Poster URL</label><input th:field="*{posterUrl}" type="url" class="form-control" placeholder="https://example.com/poster.jpg"><div class="invalid-feedback d-block" th:errors="*{posterUrl}"></div></div>
+                        <div class="col-md-6"><label class="form-label">Backdrop URL</label><input th:field="*{backdropUrl}" type="url" class="form-control" placeholder="https://example.com/backdrop.jpg"><div class="invalid-feedback d-block" th:errors="*{backdropUrl}"></div></div>
                         <div class="col-md-4">
                             <label class="form-label">Thể loại</label>
                             <div class="dropdown genre-dropdown w-100">

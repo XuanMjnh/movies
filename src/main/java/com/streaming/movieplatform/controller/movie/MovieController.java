@@ -6,6 +6,7 @@ import com.streaming.movieplatform.dto.RatingRequest;
 import com.streaming.movieplatform.entity.Movie;
 import com.streaming.movieplatform.entity.User;
 import com.streaming.movieplatform.repository.CountryRepository;
+import com.streaming.movieplatform.repository.EpisodeRepository;
 import com.streaming.movieplatform.repository.GenreRepository;
 import com.streaming.movieplatform.service.CommentService;
 import com.streaming.movieplatform.service.MovieService;
@@ -26,17 +27,20 @@ public class MovieController {
     private final UserService userService;
     private final GenreRepository genreRepository;
     private final CountryRepository countryRepository;
+    private final EpisodeRepository episodeRepository;
     private final CommentService commentService;
 
     public MovieController(MovieService movieService,
                            UserService userService,
                            GenreRepository genreRepository,
                            CountryRepository countryRepository,
+                           EpisodeRepository episodeRepository,
                            CommentService commentService) {
         this.movieService = movieService;
         this.userService = userService;
         this.genreRepository = genreRepository;
         this.countryRepository = countryRepository;
+        this.episodeRepository = episodeRepository;
         this.commentService = commentService;
     }
 
@@ -55,6 +59,7 @@ public class MovieController {
         Movie movie = movieService.getMovieDetails(movieId);
         User currentUser = userService.getCurrentUser();
         model.addAttribute("movie", movie);
+        model.addAttribute("episodes", episodeRepository.findByMovieIdAndActiveTrueOrderByEpisodeNumberAsc(movieId));
         model.addAttribute("relatedMovies", movieService.getRelatedMovies(movie));
         model.addAttribute("comments", commentService.getVisibleComments(movieId));
         model.addAttribute("commentRequest", new CommentRequest());
@@ -78,6 +83,7 @@ public class MovieController {
         }
 
         model.addAttribute("movie", movie);
+        model.addAttribute("episodes", episodeRepository.findByMovieIdAndActiveTrueOrderByEpisodeNumberAsc(movieId));
         model.addAttribute("currentEpisode", episode);
         model.addAttribute("canWatch", canWatch);
         model.addAttribute("relatedMovies", movieService.getRelatedMovies(movie));

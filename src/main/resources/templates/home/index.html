@@ -5,7 +5,7 @@
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 <main class="pb-5">
     <section class="hero-home" th:if="${banners != null and !#lists.isEmpty(banners)}">
-        <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+        <div id="heroCarousel" class="carousel slide hero-carousel" data-bs-ride="carousel" data-bs-interval="7000" data-bs-pause="false" data-bs-touch="true">
             <div class="carousel-inner">
                 <div class="carousel-item hero-banner" th:each="banner, stat : ${banners}" th:classappend="${stat.first} ? ' active'" th:with="heroImage=${banner.imageUrl != null and !banner.imageUrl.isBlank() ? banner.imageUrl : '/images/default-poster.svg'}">
                     <img th:src="${heroImage}" class="d-block w-100 hero-image" th:alt="${banner.title != null ? banner.title : 'Banner'}">
@@ -23,13 +23,34 @@
                     </div>
                 </div>
             </div>
+            <div class="carousel-indicators hero-carousel-indicators">
+                <button th:each="banner, stat : ${banners}"
+                        type="button"
+                        data-bs-target="#heroCarousel"
+                        th:attr="data-bs-slide-to=${stat.index},aria-label=${'Banner ' + (stat.index + 1)},aria-current=${stat.first ? 'true' : null}"
+                        th:classappend="${stat.first} ? ' active'"></button>
+            </div>
+            <button class="carousel-control-prev hero-carousel-control" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev" aria-label="Banner trước">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            </button>
+            <button class="carousel-control-next hero-carousel-control" type="button" data-bs-target="#heroCarousel" data-bs-slide="next" aria-label="Banner tiếp theo">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            </button>
         </div>
     </section>
 
     <section class="container-fluid container-stream mt-4">
-        <div class="category-strip glass-strip">
-            <a class="genre-chip" th:href="@{/movies}">Tất cả</a>
-            <a th:each="genre : ${genres}" class="genre-chip" th:href="@{/movies(genreId=${genre.id})}" th:text="${genre.name}">Action</a>
+        <div class="genre-showcase glass-panel">
+            <div class="genre-showcase__rail" role="list">
+                <a class="genre-pill genre-pill--all" th:href="@{/movies}">
+                    <span class="genre-pill__title">Tất cả</span>
+                </a>
+                <a th:each="genre : ${genres}"
+                   class="genre-pill"
+                   th:href="@{/movies(genreId=${genre.id})}">
+                    <span class="genre-pill__title" th:text="${genre.name}">Action</span>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -67,41 +88,33 @@
         </div>
     </section>
 
-    <section class="container-fluid container-stream mt-5" th:with="latestMovies=${sections['latest']}, latestLimit=5, premiumMovies=${sections['premium']}, premiumLimit=4">
-        <div class="content-grid">
+    <section class="container-fluid container-stream mt-5" th:with="latestMovies=${sections['latest']}, latestLimit=6">
+        <div class="section-head mb-3">
             <div>
-                <div class="section-head mb-3">
-                    <div>
-                        <p class="eyebrow mb-2">Mới cập nhật</p>
-                        <h2 class="section-title">Phim mới</h2>
-                    </div>
-                    <a th:if="${latestMovies != null and #lists.size(latestMovies) > latestLimit}" class="btn btn-surface-outline" th:href="@{/movies(sortBy='newest')}">Khám phá toàn bộ</a>
-                </div>
-                <div class="row row-cols-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5 g-4">
-                    <th:block th:each="movie, stat : ${latestMovies}">
-                        <div th:if="${stat.index < latestLimit}" th:replace="~{fragments/movie-card :: movieCard(movie=${movie})}"></div>
-                    </th:block>
-                </div>
+                <p class="eyebrow mb-2">Mới cập nhật</p>
+                <h2 class="section-title">Phim mới</h2>
             </div>
-            <aside class="glass-panel side-rail">
-                <div class="section-head mb-3">
-                    <h3 class="h5 text-white mb-0">Phim premium</h3>
-                    <a th:if="${premiumMovies != null and #lists.size(premiumMovies) > premiumLimit}" class="btn btn-sm btn-surface-outline" th:href="@{/movies(accessLevel='PREMIUM')}">Khám phá toàn bộ</a>
-                </div>
-                <div class="vstack gap-3">
-                    <a th:each="movie, stat : ${premiumMovies}"
-                       th:if="${stat.index < premiumLimit}"
-                       th:href="@{/movies/{id}(id=${movie.id})}"
-                       class="premium-mini-card text-decoration-none"
-                       th:with="poster=${movie.posterUrl != null and !movie.posterUrl.isBlank() ? movie.posterUrl : '/images/default-poster.svg'}">
-                        <img th:src="${poster}" th:alt="${movie.title != null ? movie.title : 'Movie'}">
-                        <div>
-                            <h6 class="mb-1 text-white" th:text="${movie.title != null ? movie.title : 'Đang cập nhật'}">Movie</h6>
-                            <div class="small text-secondary text-truncate-2" th:text="${movie.shortDescription != null and !movie.shortDescription.isBlank() ? movie.shortDescription : 'Nội dung đang cập nhật.'}">desc</div>
-                        </div>
-                    </a>
-                </div>
-            </aside>
+            <a th:if="${latestMovies != null and #lists.size(latestMovies) > latestLimit}" class="btn btn-surface-outline" th:href="@{/movies(sortBy='newest')}">Khám phá toàn bộ</a>
+        </div>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-xl-5 row-cols-xxl-6 g-4">
+            <th:block th:each="movie, stat : ${latestMovies}">
+                <div th:if="${stat.index < latestLimit}" th:replace="~{fragments/movie-card :: movieCard(movie=${movie})}"></div>
+            </th:block>
+        </div>
+    </section>
+
+    <section class="container-fluid container-stream mt-5" th:with="premiumMovies=${sections['premium']}, premiumLimit=6">
+        <div class="section-head">
+            <div>
+                <p class="eyebrow mb-2">Cao cấp</p>
+                <h2 class="section-title">Phim premium</h2>
+            </div>
+            <a th:if="${premiumMovies != null and #lists.size(premiumMovies) > premiumLimit}" class="btn btn-surface-outline" th:href="@{/movies(accessLevel='PREMIUM')}">Khám phá toàn bộ</a>
+        </div>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-xl-5 row-cols-xxl-6 g-4">
+            <th:block th:each="movie, stat : ${premiumMovies}">
+                <div th:if="${stat.index < premiumLimit}" th:replace="~{fragments/movie-card :: movieCard(movie=${movie})}"></div>
+            </th:block>
         </div>
     </section>
 

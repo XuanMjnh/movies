@@ -9,6 +9,7 @@ import java.util.List;
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     boolean existsByUserIdAndMovieId(Long userId, Long movieId);
     void deleteByUserIdAndMovieId(Long userId, Long movieId);
+    void deleteByMovieId(Long movieId);
 
     @EntityGraph(attributePaths = {"movie", "movie.country"})
     List<Favorite> findByUserIdOrderByCreatedAtDesc(Long userId);

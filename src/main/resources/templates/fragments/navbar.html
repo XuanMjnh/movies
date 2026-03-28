@@ -5,7 +5,7 @@
     <div class="container-fluid container-stream nav-shell">
         <a class="navbar-brand d-flex align-items-center gap-2" th:href="@{/}">
             <span class="brand-logo"><i class="bi bi-play-fill"></i></span>
-            <span class="brand-name">Ro<span class="text-accent">Stream</span></span>
+            <span class="brand-name">Best<span class="text-accent">Moives</span></span>
         </a>
         <div class="d-flex align-items-center gap-2 order-xl-3">
             <button class="btn btn-icon btn-surface theme-toggle" type="button" aria-label="Đổi giao diện" data-theme-toggle>
@@ -22,6 +22,12 @@
                 <li class="nav-item"><a class="nav-link" th:href="@{/movies}">Tất cả phim</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/movies(movieType='MOVIE')}">Phim lẻ</a></li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/movies(movieType='SERIES')}">Phim bộ</a></li>
+                <li class="nav-item nav-item-optional-country" th:if="${southKoreaCountryId != null}">
+                    <a class="nav-link" th:href="@{/movies(countryId=${southKoreaCountryId})}">Phim Hàn Quốc</a>
+                </li>
+                <li class="nav-item nav-item-optional-country" th:if="${usaCountryId != null}">
+                    <a class="nav-link" th:href="@{/movies(countryId=${usaCountryId})}">Phim Mỹ</a>
+                </li>
                 <li class="nav-item"><a class="nav-link" th:href="@{/subscription/plans}">Gói thành viên</a></li>
                 <li class="nav-item" sec:authorize="hasAuthority('ROLE_ADMIN')"><a class="nav-link" th:href="@{/admin}">Admin</a></li>
             </ul>

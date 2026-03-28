@@ -61,11 +61,11 @@ INSERT INTO payment_transactions (id, user_id, wallet_transaction_id, amount, pr
 (7, 2, 18, 100000.00, 'VNPAY', 'VNP-DEP-0007', 'PENDING', DATE_SUB(NOW(), INTERVAL 6 HOUR), DATE_SUB(NOW(), INTERVAL 6 HOUR));
 
 INSERT INTO countries (id, name, created_at, updated_at) VALUES
-(1, 'USA', NOW(), NOW()),
-(2, 'South Korea', NOW(), NOW()),
+(1, 'Mỹ', NOW(), NOW()),
+(2, 'Hàn Quốc', NOW(), NOW()),
 (3, 'Japan', NOW(), NOW()),
 (4, 'United Kingdom', NOW(), NOW()),
-(5, 'Viet Nam', NOW(), NOW()),
+(5, 'Việt Nam', NOW(), NOW()),
 (6, 'France', NOW(), NOW());
 
 INSERT INTO genres (id, name, description, created_at, updated_at) VALUES

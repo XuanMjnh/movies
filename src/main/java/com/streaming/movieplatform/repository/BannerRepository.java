@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface BannerRepository extends JpaRepository<Banner, Long> {
     List<Banner> findByActiveTrueOrderByDisplayOrderAsc();
+    void deleteByMovieId(Long movieId);
 }

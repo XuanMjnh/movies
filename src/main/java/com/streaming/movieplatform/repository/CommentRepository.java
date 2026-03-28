@@ -8,4 +8,5 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByMovieIdAndHiddenFalseOrderByCreatedAtDesc(Long movieId);
     List<Comment> findAllByOrderByCreatedAtDesc();
+    void deleteByMovieId(Long movieId);
 }

@@ -65,14 +65,25 @@
             </div>
 
             <div class="glass-panel mb-4">
-                <h3 class="text-white mb-3">Danh sách tập</h3>
-                <div class="list-group list-group-flush" th:if="${movie.episodes != null and !#lists.isEmpty(movie.episodes)}">
-                    <a th:each="episode : ${movie.episodes}" class="list-group-item bg-transparent text-white border-secondary-subtle d-flex justify-content-between align-items-center" th:href="@{/movies/{movieId}/watch(movieId=${movie.id}, episodeId=${episode.id})}">
-                        <span>Tập <span th:text="${episode.episodeNumber != null ? episode.episodeNumber : '?'}">1</span> - <span th:text="${episode.title != null ? episode.title : 'Đang cập nhật'}">Title</span></span>
-                        <span class="badge badge-soft" th:text="${episode.durationMinutes != null ? episode.durationMinutes + ' phút' : 'N/A'}">40 phút</span>
+                <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+                    <h3 class="text-white mb-0">Danh sách tập</h3>
+                    <span class="episode-count-pill" th:text="${episodes != null ? #lists.size(episodes) + ' tập' : '0 tập'}">0 tập</span>
+                </div>
+                <div class="episode-list" th:if="${episodes != null and !#lists.isEmpty(episodes)}">
+                    <a th:each="episode : ${episodes}"
+                       class="episode-list-item text-decoration-none"
+                       th:href="@{/movies/{movieId}/watch(movieId=${movie.id}, episodeId=${episode.id})}">
+                        <div class="episode-list-main">
+                            <div class="episode-number-badge" th:text="${episode.episodeNumber != null ? 'Tập ' + episode.episodeNumber : 'Tập ?'}">Tập 1</div>
+                            <div>
+                                <div class="episode-title-line" th:text="${episode.title != null and !episode.title.isBlank() ? episode.title : 'Đang cập nhật'}">Tên tập</div>
+                                <div class="episode-meta-line">Sẵn sàng phát</div>
+                            </div>
+                        </div>
+                        <div class="episode-duration-pill" th:text="${episode.durationMinutes != null ? episode.durationMinutes + ' phút' : 'N/A'}">40 phút</div>
                     </a>
                 </div>
-                <div class="text-secondary" th:if="${movie.episodes == null or #lists.isEmpty(movie.episodes)}">Phim chưa có tập phát hành.</div>
+                <div class="text-secondary" th:if="${episodes == null or #lists.isEmpty(episodes)}">Phim chưa có tập phát hành.</div>
             </div>
 
             <div class="glass-panel mb-4">

@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public interface MovieRepository extends JpaRepository<Movie, Long> {
 
-    @EntityGraph(attributePaths = {"genres", "actors", "directors", "country", "episodes"})
+    @EntityGraph(attributePaths = {"genres", "actors", "directors", "country"})
     Optional<Movie> findWithDetailsById(Long id);
 
     @EntityGraph(attributePaths = {"genres", "country"})
