@@ -277,6 +277,16 @@ Lưu ý:
 - Ví chỉ được cộng tiền sau khi hệ thống nhận `IPN` hợp lệ
 - Khi kiểm thử trên máy local, `IPN URL` cần được public qua HTTPS, ví dụ bằng ngrok
 
+### Thông tin test VNPAY sandbox
+
+Thông tin dưới đây chỉ dùng cho môi trường sandbox khi kiểm thử luồng thanh toán:
+
+- Ngân hàng: `NCB`
+- Số thẻ: `9704198526191432198`
+- Tên chủ thẻ: `NGUYEN VAN A`
+- Ngày phát hành: `07/15`
+- Mật khẩu OTP: `123456`
+
 ## 12) Ghi chú triển khai
 
 - Repo hiện chưa có Maven Wrapper, vì vậy môi trường chạy bằng terminal cần có Maven cài sẵn
