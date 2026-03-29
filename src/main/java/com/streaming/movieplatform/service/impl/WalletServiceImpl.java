@@ -102,7 +102,7 @@ public class WalletServiceImpl implements WalletService {
     @Override
     public String createVnPayDepositPaymentUrl(User user, DepositRequest request, String clientIp) {
         if (!vnPayProperties.isConfigured()) {
-            throw new BusinessException("VNPAY chưa được cấu hình đầy đủ. Hãy cập nhật tmnCode, hashSecret và returnUrl trong application.properties");
+            throw new BusinessException("VNPAY chưa được cấu hình đầy đủ. Hãy cập nhật VNPAY_TMN_CODE, VNPAY_HASH_SECRET và VNPAY_RETURN_URL trong file .env");
         }
 
         Wallet wallet = getWallet(user);

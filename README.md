@@ -1,37 +1,32 @@
 # movie-streaming-platform
 
-Mini đồ án website xem phim bản quyền hiện đại, xây dựng bằng **Java 17 + Spring Boot + Spring MVC + Spring Security + Spring Data JPA + MySQL + Thymeleaf + Bootstrap 5**.
+Mini đồ án website xem phim bản quyền, xây dựng bằng **Java 17 + Spring Boot + Spring MVC + Spring Security + Spring Data JPA + MySQL + Thymeleaf + Bootstrap 5**.
 
 ## 1) Tổng quan
 
-Dự án mô phỏng một nền tảng streaming mini với đầy đủ các luồng:
+Dự án mô phỏng một nền tảng streaming mini với các luồng chính:
 
-- Đăng ký / đăng nhập / đăng xuất / quên mật khẩu cơ bản
+- Đăng ký, đăng nhập, đăng xuất, quên mật khẩu cơ bản
 - Phân quyền `GUEST / USER / ADMIN`
-- Trang chủ streaming giao diện dark theme hiện đại
-- Danh sách phim, lọc đa điều kiện, phân trang, sắp xếp
-- Chi tiết phim, trailer, badge quyền xem, bình luận, rating sao
-- Player HTML5 riêng, lưu tiến độ xem, continue watching
-- Yêu thích, lịch sử xem, hồ sơ cá nhân, đổi mật khẩu
-- Ví tiền, nạp tiền qua VNPAY, lịch sử giao dịch
+- Danh sách phim, lọc, sắp xếp, phân trang
+- Trang chi tiết phim, rating, bình luận, lịch sử xem
+- Ví người dùng, nạp tiền qua VNPAY, lịch sử giao dịch
 - Mua gói thành viên `Free / Standard / Premium`
-- Chặn xem phim `STANDARD / PREMIUM` khi user chưa đủ quyền
-- Dashboard admin, quản lý phim, tập phim, user, genre, banner, plan, comment, transaction
+- Chặn nội dung `STANDARD / PREMIUM` khi user chưa đủ quyền
+- Dashboard admin và các màn CRUD quản trị
 
 ## 2) Stack sử dụng
 
 - Java 17
-- Spring Boot 3.2.x
+- Spring Boot 3.2.5
 - Spring MVC
 - Spring Security
-- Spring Data JPA / Hibernate
+- Spring Data JPA / Hibernate 6
 - MySQL 8+
-- Maven
 - Thymeleaf
 - Bootstrap 5
-- HTML5 / CSS3 / JavaScript
-- BCryptPasswordEncoder
-- Jakarta Validation
+- Maven
+- spring-dotenv
 
 ## 3) Cấu trúc thư mục
 
@@ -39,100 +34,145 @@ Dự án mô phỏng một nền tảng streaming mini với đầy đủ các l
 movie-streaming-platform/
 ├─ pom.xml
 ├─ README.md
-├─ src/main/java/com/streaming/movieplatform/
-│  ├─ MovieStreamingPlatformApplication.java
-│  ├─ config/
-│  ├─ controller/
-│  │  ├─ admin/
-│  │  ├─ auth/
-│  │  ├─ movie/
-│  │  └─ user/
-│  ├─ dto/
-│  ├─ entity/
-│  ├─ enums/
-│  ├─ exception/
-│  ├─ repository/
-│  ├─ security/
-│  ├─ service/
-│  ├─ service/impl/
-│  ├─ util/
-│  └─ validation/
-└─ src/main/resources/
-   ├─ application.properties
-   ├─ schema.sql
-   ├─ data.sql
-   ├─ static/
-   │  ├─ css/
-   │  ├─ js/
-   │  └─ uploads/
-   └─ templates/
-      ├─ admin/
-      ├─ auth/
-      ├─ fragments/
-      ├─ home/
-      ├─ movie/
-      ├─ subscription/
-      ├─ user/
-      └─ wallet/
+├─ .env                        # local only, không commit
+├─ uploads/                    # file upload runtime
+└─ src/
+   └─ main/
+      ├─ java/com/streaming/movieplatform/
+      │  ├─ MovieStreamingPlatformApplication.java
+      │  ├─ config/
+      │  ├─ controller/
+      │  ├─ dto/
+      │  ├─ entity/
+      │  ├─ enums/
+      │  ├─ exception/
+      │  ├─ repository/
+      │  ├─ security/
+      │  ├─ service/
+      │  ├─ service/impl/
+      │  ├─ util/
+      │  └─ validation/
+      └─ resources/
+         ├─ application.properties
+         ├─ static/
+         │  ├─ css/
+         │  ├─ images/
+         │  ├─ js/
+         │  └─ uploads/
+         └─ templates/
+            ├─ admin/
+            ├─ auth/
+            ├─ fragments/
+            ├─ home/
+            ├─ movie/
+            ├─ subscription/
+            ├─ user/
+            └─ wallet/
 ```
 
-## 4) Cách chạy dự án
+## 4) Cấu hình môi trường
 
-### Bước 1: Tạo database MySQL
-
-```sql
-CREATE DATABASE movie_streaming_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
-
-### Bước 2: Sửa thông tin kết nối DB
-
-Mở file:
+Ứng dụng đọc biến môi trường từ file `.env` thông qua:
 
 ```properties
-src/main/resources/application.properties
+spring.config.import=optional:file:.env[.properties]
 ```
 
-Sửa đúng tài khoản MySQL của bạn:
+File `.env` cần được đặt ở thư mục gốc project. Spring Boot sẽ tự nạp file này khi chạy bằng IDE hoặc Maven nếu `working directory` trỏ đúng về thư mục gốc.
+
+### Mẫu `.env` cho MySQL local
+
+```dotenv
+DB_URL=jdbc:mysql://localhost:3306/movie_streaming_platform?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Bangkok&characterEncoding=UTF-8
+DB_USERNAME=root
+DB_PASSWORD=123456
+DB_DRIVER=com.mysql.cj.jdbc.Driver
+
+VNPAY_ENABLED=false
+VNPAY_TMN_CODE=
+VNPAY_HASH_SECRET=
+VNPAY_PAY_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+VNPAY_RETURN_URL=http://localhost:8080/payment/vnpay/return
+VNPAY_LOCALE=vn
+VNPAY_ORDER_TYPE=other
+VNPAY_EXPIRE_MINUTES=15
+```
+
+### Mẫu `.env` cho MySQL managed service như Aiven
+
+```dotenv
+DB_URL=jdbc:mysql://your-host:28077/defaultdb?sslMode=REQUIRED&serverTimezone=Asia/Bangkok&characterEncoding=UTF-8
+DB_USERNAME=your-username
+DB_PASSWORD=your-password
+DB_DRIVER=com.mysql.cj.jdbc.Driver
+```
+
+File `.env` đã được ignore trong `.gitignore`.
+
+## 5) Lưu ý quan trọng về database
+
+Hiện tại project đang để:
 
 ```properties
-spring.datasource.username=root
-spring.datasource.password=123456
+spring.jpa.hibernate.ddl-auto=none
+spring.sql.init.mode=never
+spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
 ```
 
-### Bước 3: Chạy project
+Nghĩa là ứng dụng **không tự tạo bảng** và **không tự chạy SQL init** lúc khởi động.
 
-Chạy bằng IDE hoặc Maven:
+Repo hiện tại **không còn** `schema.sql` và `data.sql`, vì vậy database cần được chuẩn bị sẵn trước khi khởi động ứng dụng:
+
+- Đã có schema/tables phù hợp với các entity
+- Có dữ liệu nền để kiểm thử đầy đủ luồng phim, gói thành viên và dashboard
+
+Nếu database trống, ứng dụng có thể kết nối thành công nhưng sẽ lỗi khi bắt đầu truy vấn dữ liệu.
+
+## 6) Chạy dự án
+
+### Yêu cầu
+
+- Java 17
+- Maven 3.9+ hoặc chạy trực tiếp bằng IDE
+- MySQL 8+ hoặc managed MySQL compatible
+
+### Các bước
+
+1. Tạo và chuẩn bị database trước.
+2. Tạo file `.env` ở thư mục gốc project.
+3. Chạy project bằng IDE hoặc Maven:
 
 ```bash
 mvn spring-boot:run
 ```
 
-Sau khi khởi động thành công, truy cập:
+Sau khi khởi động thành công, ứng dụng mặc định phục vụ tại:
 
 ```text
 http://localhost:8080
 ```
 
-## 5) Cơ chế init dữ liệu
+## 7) Dữ liệu seed hiện có
 
-Dự án dùng **2 lớp khởi tạo dữ liệu**:
+`DataSeeder` được kích hoạt khi startup. Thành phần này **không tạo schema**, nhưng sẽ seed một số dữ liệu demo nếu các bảng đã tồn tại.
 
-1. `schema.sql` tạo toàn bộ bảng, khóa ngoại, index.
-2. `data.sql` nạp dữ liệu domain mẫu: quốc gia, thể loại, diễn viên, đạo diễn, gói thành viên, 15 phim, tập phim, banner.
-3. `DataSeeder` tạo tài khoản demo bằng **BCrypt** khi ứng dụng khởi động:
-   - `admin@example.com / admin123`
-   - `user@example.com / user123`
+Những gì `DataSeeder` đang làm:
 
-Ngoài ra `DataSeeder` còn tạo:
+- Tạo role `ROLE_GUEST`, `ROLE_USER`, `ROLE_ADMIN` nếu chưa tồn tại
+- Tạo tài khoản:
+  - `admin@example.com / admin123`
+  - `user@example.com / user123`
+- Tạo ví cho user demo
+- Nạp số dư demo `300000` cho user demo khi cần
+- Tạo một giao dịch nạp tiền mẫu cho user demo
+- Nếu database đã có `SubscriptionPlan` tên `Standard`, sẽ tạo một subscription hết hạn để test flow nâng cấp
+- Nếu database đã có phim và tập phim, sẽ tạo:
+  - favorite mẫu
+  - lịch sử xem mẫu
+  - bình luận mẫu
+  - rating mẫu
 
-- ví mặc định cho user demo
-- số dư demo để test mua gói
-- giao dịch nạp tiền mẫu
-- lịch sử subscription mẫu đã hết hạn
-- favorite / comment / rating mẫu
-- history mẫu để test continue watching
-
-## 6) Tài khoản test
+## 8) Tài khoản test
 
 ### Admin
 
@@ -144,128 +184,25 @@ Ngoài ra `DataSeeder` còn tạo:
 - Email: `user@example.com`
 - Password: `user123`
 
-## 7) Luồng test chính
+## 9) Luồng test chính
 
-### A. Test đăng nhập user
+### A. Đăng nhập user
 
-1. Vào `/login`
+1. Truy cập `/login`
 2. Đăng nhập bằng `user@example.com / user123`
-3. Kiểm tra navbar đã hiển thị menu user
-4. Vào `/user/profile`, `/user/favorites`, `/user/history`, `/user/wallet`
+3. Kiểm tra các màn:
+   - `/user/profile`
+   - `/user/favorites`
+   - `/user/history`
+   - `/user/wallet`
 
-### B. Test xem phim free
+### B. Nạp tiền qua VNPAY
 
-1. Đăng nhập user demo hoặc xem bằng guest
-2. Vào `/movies`
-3. Mở phim `Saigon Heatwave` hoặc `Whispering Tides`
-4. Bấm `Xem ngay`
-5. Player phải phát video bình thường
-
-### C. Test chặn phim premium khi chưa đủ quyền
-
-1. Đăng nhập `user@example.com / user123`
-2. Vì user demo chỉ có số dư và lịch sử gói cũ đã hết hạn, access hiện tại là `FREE`
-3. Vào phim `Quantum Heist`, `Aurora Station` hoặc `Code Zero`
-4. Bấm `Xem ngay`
-5. Màn hình player sẽ bị khóa và hiện CTA nâng cấp gói
-
-### D. Test nạp tiền qua VNPAY
-
-1. Cấu hình VNPAY trong `src/main/resources/application.properties`:
-
-```properties
-app.payment.vnpay.enabled=true
-app.payment.vnpay.tmn-code=YOUR_TMN_CODE
-app.payment.vnpay.hash-secret=YOUR_HASH_SECRET
-app.payment.vnpay.return-url=https://your-domain/payment/vnpay/return
-```
-
-2. Public endpoint IPN bằng HTTPS và khai báo với VNPAY:
-
-```text
-GET /payment/vnpay/ipn
-```
-
-3. Vào `/user/wallet/deposit`
-4. Nhập `100000` hoặc `300000`, hệ thống sẽ redirect sang VNPAY
-5. Sau khi VNPAY gọi IPN thành công, hệ thống sẽ:
-   - cập nhật `wallet_transactions` từ `PENDING` sang `SUCCESS`
-   - cập nhật `payment_transactions`
-   - cộng tiền vào `wallet.balance`
-
-### E. Test mua gói premium
-
-1. Đăng nhập `user@example.com / user123`
-2. Vào `/user/wallet` kiểm tra số dư (DataSeeder đã nạp sẵn 300000)
-3. Vào `/subscription/plans`
-4. Mua gói `Premium`
-5. Hệ thống sẽ:
-   - kiểm tra đủ tiền trong ví
-   - trừ số dư ví
-   - tạo / cập nhật `user_subscriptions`
-   - tạo `wallet_transactions` loại `SUBSCRIPTION_PURCHASE`
-6. Vào `/user/subscription/current` để xem gói hiện tại và số ngày còn lại
-
-### F. Test xem phim premium sau khi mua
-
-1. Sau khi mua Premium, vào lại `Quantum Heist`
-2. Bấm `Xem ngay`
-3. Player phải mở bình thường
-4. Khi pause hoặc thoát tab, hệ thống sẽ gọi `/user/history/progress` để lưu tiến độ
-5. Vào `/user/history` sẽ thấy mục continue watching
-
-### G. Test yêu thích
-
-1. Vào chi tiết một phim bất kỳ
-2. Bấm `Thêm yêu thích`
-3. Vào `/user/favorites`
-4. Phim phải xuất hiện trong danh sách
-
-### H. Test bình luận và rating
-
-1. Đăng nhập user
-2. Vào trang chi tiết phim
-3. Gửi bình luận
-4. Gửi rating 1-5 sao
-5. Refresh lại trang, rating trung bình của phim sẽ được cập nhật
-
-### I. Test admin
-
-1. Đăng nhập `admin@example.com / admin123`
-2. Vào `/admin`
-3. Kiểm tra dashboard tổng quan
-4. Vào các mục:
-   - `/admin/movies`
-   - `/admin/users`
-   - `/admin/genres`
-   - `/admin/plans`
-   - `/admin/banners`
-   - `/admin/comments`
-   - `/admin/transactions`
-5. Thử thêm / sửa / xóa để xác nhận CRUD hoạt động
-
-## 8) Upload file
-
-Ảnh upload được lưu tại thư mục local:
-
-```text
-uploads/
-```
-
-và được map ra public URL:
-
-```text
-/uploads/**
-```
-
-## 9) Cấu hình VNPAY
-
-Dự án đã tích hợp luồng VNPAY theo mô hình chuẩn:
-
-- Tạo URL thanh toán tại server
-- Redirect khách hàng sang VNPAY
-- Nhận `Return URL` để hiển thị kết quả
-- Nhận `IPN URL` để cập nhật ví và trạng thái giao dịch
+1. Cấu hình đầy đủ các biến `VNPAY_*` trong `.env`
+2. Public endpoint IPN qua HTTPS
+3. Truy cập `/user/wallet/deposit`
+4. Tạo giao dịch nạp tiền và chuyển sang cổng VNPAY
+5. Kiểm tra `Return URL` và `IPN URL`
 
 Các endpoint chính:
 
@@ -275,25 +212,74 @@ GET  /payment/vnpay/return
 GET  /payment/vnpay/ipn
 ```
 
-Lưu ý khi test local: VNPAY cần gọi được `IPN URL` qua HTTPS. Bạn có thể dùng ngrok hoặc deploy tạm ra môi trường public.
+### C. Mua gói thành viên
 
-## 10) Ghi chú triển khai
+1. Đăng nhập `user@example.com / user123`
+2. Truy cập `/subscription/plans`
+3. Mua gói `Standard` hoặc `Premium`
+4. Kiểm tra:
+   - số dư ví bị trừ
+   - lịch sử giao dịch được tạo
+   - trạng thái gói hiện tại tại `/user/subscription/current`
 
-- Player dùng HTML5 video với URL MP4 public mẫu để dễ test.
-- Dự án ưu tiên tính đồng bộ và khả năng chạy nhanh cho đồ án.
-- Phần `forgot password` là phiên bản cơ bản, không dùng email token thực tế.
-- Nếu cần nâng cấp sản phẩm thật, nên bổ sung:
-  - email verification / reset token
-  - cloud storage cho media
-  - payment gateway thật
-  - logging / audit / test cases
-  - caching / Redis / CDN
-  - streaming HLS / DRM / subtitle
+### D. Quản trị
 
-## 11) Điểm nổi bật cho demo đồ án
+1. Đăng nhập `admin@example.com / admin123`
+2. Truy cập `/admin`
+3. Kiểm tra dashboard và các màn CRUD:
+   - `/admin/movies`
+   - `/admin/users`
+   - `/admin/genres`
+   - `/admin/plans`
+   - `/admin/banners`
+   - `/admin/comments`
+   - `/admin/transactions`
+   - `/admin/vouchers`
 
-- Có dữ liệu lớn vừa đủ để trình bày đẹp khi demo
-- Có phân quyền thực sự bằng Spring Security
-- Có business flow đầy đủ: **nạp tiền → mua gói → mở quyền xem premium**
-- Có admin dashboard và CRUD quản trị
-- UI dark theme đẹp hơn mức bài tập cơ bản
+## 10) Upload file
+
+File upload được lưu trong thư mục local:
+
+```text
+uploads/
+```
+
+Tài nguyên được expose ra public URL:
+
+```text
+/uploads/**
+```
+
+Giá trị này được cấu hình bởi:
+
+```properties
+app.upload-dir=uploads
+```
+
+## 11) Cấu hình VNPAY
+
+Cấu hình trong `.env`:
+
+```dotenv
+VNPAY_ENABLED=true
+VNPAY_TMN_CODE=YOUR_TMN_CODE
+VNPAY_HASH_SECRET=YOUR_HASH_SECRET
+VNPAY_PAY_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+VNPAY_RETURN_URL=https://your-domain/payment/vnpay/return
+VNPAY_LOCALE=vn
+VNPAY_ORDER_TYPE=other
+VNPAY_EXPIRE_MINUTES=15
+```
+
+Lưu ý:
+
+- `Return URL` dùng để hiển thị kết quả thanh toán
+- Ví chỉ được cộng tiền sau khi hệ thống nhận `IPN` hợp lệ
+- Khi kiểm thử trên máy local, `IPN URL` cần được public qua HTTPS, ví dụ bằng ngrok
+
+## 12) Ghi chú triển khai
+
+- Repo hiện chưa có Maven Wrapper, vì vậy môi trường chạy bằng terminal cần có Maven cài sẵn
+- Nếu IntelliJ không đọc `.env`, `Working directory` của Run Configuration cần trỏ về thư mục gốc project
+- Với Aiven hoặc dịch vụ MySQL managed khác, tham số `sslMode=REQUIRED` cần được giữ nguyên
+- Để demo đầy đủ dữ liệu phim, gói thành viên và banner, database cần được import bộ dữ liệu nền trước
