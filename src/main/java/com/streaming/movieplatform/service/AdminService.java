@@ -22,18 +22,28 @@ public interface AdminService {
     List<AdminRevenueItem> getMonthlyRevenueStats();
     List<AdminChartItem> getMovieTypeStats();
     List<AdminChartItem> getTopViewedMovieStats();
+
     List<User> getAllUsers();
+    User getUserById(Long userId);
     User updateUser(AdminUserUpdateRequest request);
+
     List<Genre> getAllGenres();
+    Genre getGenreById(Long genreId);
     Genre saveGenre(AdminGenreRequest request);
     void deleteGenre(Long genreId);
+
     List<Banner> getAllBanners();
+    Banner getBannerById(Long bannerId);
     Banner saveBanner(AdminBannerRequest request);
     void deleteBanner(Long bannerId);
+
     List<SubscriptionPlan> getAllPlans();
+    SubscriptionPlan getPlanById(Long planId);
     SubscriptionPlan savePlan(AdminPlanRequest request);
     void deletePlan(Long planId);
+
     List<Voucher> getAllVouchers();
+    Voucher getVoucherById(Long voucherId);
     Voucher saveVoucher(AdminVoucherRequest request);
     void deleteVoucher(Long voucherId);
 }

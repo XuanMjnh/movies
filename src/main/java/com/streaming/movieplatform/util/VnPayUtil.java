@@ -8,6 +8,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -21,8 +22,13 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class VnPayUtil {
 
     private static final DateTimeFormatter VNPAY_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    private static final ZoneId VNPAY_ZONE_ID = ZoneId.of("Asia/Ho_Chi_Minh");
 
     private VnPayUtil() {
+    }
+
+    public static LocalDateTime nowInVnPayZone() {
+        return LocalDateTime.now(VNPAY_ZONE_ID);
     }
 
     public static String formatDate(LocalDateTime value) {
@@ -30,7 +36,7 @@ public final class VnPayUtil {
     }
 
     public static String generateTxnRef() {
-        return "VNP" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+        return "VNP" + nowInVnPayZone().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
                 + ThreadLocalRandom.current().nextInt(100000, 999999);
     }
 

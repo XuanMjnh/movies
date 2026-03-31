@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Comparator;
 
 @Service
 @Transactional
@@ -186,9 +185,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     @Transactional(readOnly = true)
     public List<AdminChartItem> getTopViewedMovieStats() {
-        return movieRepository.findAll().stream()
-                .sorted(Comparator.comparingLong(Movie::getViewCount).reversed())
-                .limit(5)
+        return movieRepository.findTop5ByOrderByViewCountDesc().stream()
                 .map(movie -> new AdminChartItem(movie.getTitle(), movie.getViewCount()))
                 .toList();
     }
@@ -200,9 +197,15 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người dùng"));
+    }
+
+    @Override
     public User updateUser(AdminUserUpdateRequest request) {
-        User user = userRepository.findById(request.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy user"));
+        User user = getUserById(request.getId());
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
@@ -225,9 +228,15 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Genre saveGenre(AdminGenreRequest request) {
-        Genre genre = request.getId() == null ? new Genre() : genreRepository.findById(request.getId())
+    @Transactional(readOnly = true)
+    public Genre getGenreById(Long genreId) {
+        return genreRepository.findById(genreId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thể loại"));
+    }
+
+    @Override
+    public Genre saveGenre(AdminGenreRequest request) {
+        Genre genre = request.getId() == null ? new Genre() : getGenreById(request.getId());
         genre.setName(request.getName());
         genre.setDescription(request.getDescription());
         return genreRepository.save(genre);
@@ -245,9 +254,15 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public Banner saveBanner(AdminBannerRequest request) {
-        Banner banner = request.getId() == null ? new Banner() : bannerRepository.findById(request.getId())
+    @Transactional(readOnly = true)
+    public Banner getBannerById(Long bannerId) {
+        return bannerRepository.findById(bannerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy banner"));
+    }
+
+    @Override
+    public Banner saveBanner(AdminBannerRequest request) {
+        Banner banner = request.getId() == null ? new Banner() : getBannerById(request.getId());
         banner.setTitle(request.getTitle());
         banner.setSubtitle(request.getSubtitle());
         banner.setImageUrl(storageService.store(request.getImageFile(), "banners", request.getExistingImageUrl()));
@@ -277,9 +292,15 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public SubscriptionPlan savePlan(AdminPlanRequest request) {
-        SubscriptionPlan plan = request.getId() == null ? new SubscriptionPlan() : subscriptionPlanRepository.findById(request.getId())
+    @Transactional(readOnly = true)
+    public SubscriptionPlan getPlanById(Long planId) {
+        return subscriptionPlanRepository.findById(planId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy gói thành viên"));
+    }
+
+    @Override
+    public SubscriptionPlan savePlan(AdminPlanRequest request) {
+        SubscriptionPlan plan = request.getId() == null ? new SubscriptionPlan() : getPlanById(request.getId());
         plan.setName(request.getName());
         plan.setAccessLevel(request.getAccessLevel());
         plan.setPrice(request.getPrice());
@@ -298,6 +319,13 @@ public class AdminServiceImpl implements AdminService {
     @Transactional(readOnly = true)
     public List<Voucher> getAllVouchers() {
         return voucherRepository.findAllByOrderByCreatedAtDesc();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Voucher getVoucherById(Long voucherId) {
+        return voucherRepository.findById(voucherId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy voucher"));
     }
 
     @Override
@@ -322,8 +350,7 @@ public class AdminServiceImpl implements AdminService {
                     throw new BusinessException("Mã voucher đã tồn tại");
                 });
 
-        Voucher voucher = request.getId() == null ? new Voucher() : voucherRepository.findById(request.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy voucher"));
+        Voucher voucher = request.getId() == null ? new Voucher() : getVoucherById(request.getId());
 
         voucher.setCode(normalizedCode);
         voucher.setName(request.getName().trim());
@@ -351,9 +378,10 @@ public class AdminServiceImpl implements AdminService {
     }
 
     private List<WalletTransaction> getSuccessfulRevenueTransactions() {
-        return walletTransactionRepository.findAll().stream()
-                .filter(tx -> tx.getStatus() == TransactionStatus.SUCCESS && tx.getType() == TransactionType.SUBSCRIPTION_PURCHASE)
-                .toList();
+        return walletTransactionRepository.findByStatusAndTypeOrderByCreatedAtDesc(
+                TransactionStatus.SUCCESS,
+                TransactionType.SUBSCRIPTION_PURCHASE
+        );
     }
 
     private BigDecimal sumTransactionAmounts(List<WalletTransaction> transactions) {

@@ -56,8 +56,7 @@ public class AdminManagementController {
 
     @GetMapping("/users")
     public String users(Model model) {
-        model.addAttribute("users", adminService.getAllUsers());
-        model.addAttribute("roles", roleRepository.findAll());
+        populateUsersPage(model);
         if (!model.containsAttribute("userForm")) {
             model.addAttribute("userForm", new AdminUserUpdateRequest());
         }
@@ -66,7 +65,7 @@ public class AdminManagementController {
 
     @GetMapping("/users/{userId}/edit")
     public String editUser(@PathVariable Long userId, Model model) {
-        var user = adminService.getAllUsers().stream().filter(u -> u.getId().equals(userId)).findFirst().orElseThrow();
+        var user = adminService.getUserById(userId);
         AdminUserUpdateRequest form = new AdminUserUpdateRequest();
         form.setId(user.getId());
         form.setFullName(user.getFullName());
@@ -74,8 +73,7 @@ public class AdminManagementController {
         form.setPhone(user.getPhone());
         form.setEnabled(user.isEnabled());
         form.setRoleNames(user.getRoles().stream().map(r -> r.getName().name()).toList());
-        model.addAttribute("users", adminService.getAllUsers());
-        model.addAttribute("roles", roleRepository.findAll());
+        populateUsersPage(model);
         model.addAttribute("userForm", form);
         return "admin/users";
     }
@@ -86,8 +84,7 @@ public class AdminManagementController {
                            Model model,
                            RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("users", adminService.getAllUsers());
-            model.addAttribute("roles", roleRepository.findAll());
+            populateUsersPage(model);
             return "admin/users";
         }
         adminService.updateUser(request);
@@ -112,7 +109,7 @@ public class AdminManagementController {
 
     @GetMapping("/genres")
     public String genres(Model model) {
-        model.addAttribute("genres", adminService.getAllGenres());
+        populateGenresPage(model);
         if (!model.containsAttribute("genreForm")) {
             model.addAttribute("genreForm", new AdminGenreRequest());
         }
@@ -121,12 +118,12 @@ public class AdminManagementController {
 
     @GetMapping("/genres/{genreId}/edit")
     public String editGenre(@PathVariable Long genreId, Model model) {
-        var genre = adminService.getAllGenres().stream().filter(g -> g.getId().equals(genreId)).findFirst().orElseThrow();
+        var genre = adminService.getGenreById(genreId);
         AdminGenreRequest form = new AdminGenreRequest();
         form.setId(genre.getId());
         form.setName(genre.getName());
         form.setDescription(genre.getDescription());
-        model.addAttribute("genres", adminService.getAllGenres());
+        populateGenresPage(model);
         model.addAttribute("genreForm", form);
         return "admin/genres";
     }
@@ -137,7 +134,7 @@ public class AdminManagementController {
                             Model model,
                             RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("genres", adminService.getAllGenres());
+            populateGenresPage(model);
             return "admin/genres";
         }
         adminService.saveGenre(request);
@@ -154,7 +151,7 @@ public class AdminManagementController {
 
     @GetMapping("/plans")
     public String plans(Model model) {
-        model.addAttribute("plans", adminService.getAllPlans());
+        populatePlansPage(model);
         if (!model.containsAttribute("planForm")) {
             model.addAttribute("planForm", new AdminPlanRequest());
         }
@@ -163,7 +160,7 @@ public class AdminManagementController {
 
     @GetMapping("/plans/{planId}/edit")
     public String editPlan(@PathVariable Long planId, Model model) {
-        var plan = adminService.getAllPlans().stream().filter(p -> p.getId().equals(planId)).findFirst().orElseThrow();
+        var plan = adminService.getPlanById(planId);
         AdminPlanRequest form = new AdminPlanRequest();
         form.setId(plan.getId());
         form.setName(plan.getName());
@@ -172,7 +169,7 @@ public class AdminManagementController {
         form.setDurationDays(plan.getDurationDays());
         form.setActive(plan.isActive());
         form.setFeatureDescription(plan.getFeatureDescription());
-        model.addAttribute("plans", adminService.getAllPlans());
+        populatePlansPage(model);
         model.addAttribute("planForm", form);
         return "admin/plans";
     }
@@ -183,7 +180,7 @@ public class AdminManagementController {
                            Model model,
                            RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("plans", adminService.getAllPlans());
+            populatePlansPage(model);
             return "admin/plans";
         }
         adminService.savePlan(request);
@@ -200,7 +197,7 @@ public class AdminManagementController {
 
     @GetMapping("/vouchers")
     public String vouchers(Model model) {
-        model.addAttribute("vouchers", adminService.getAllVouchers());
+        populateVouchersPage(model);
         if (!model.containsAttribute("voucherForm")) {
             AdminVoucherRequest form = new AdminVoucherRequest();
             form.setActive(true);
@@ -216,7 +213,7 @@ public class AdminManagementController {
 
     @GetMapping("/vouchers/{voucherId}/edit")
     public String editVoucher(@PathVariable Long voucherId, Model model) {
-        var voucher = adminService.getAllVouchers().stream().filter(item -> item.getId().equals(voucherId)).findFirst().orElseThrow();
+        var voucher = adminService.getVoucherById(voucherId);
         AdminVoucherRequest form = new AdminVoucherRequest();
         form.setId(voucher.getId());
         form.setCode(voucher.getCode());
@@ -230,7 +227,7 @@ public class AdminManagementController {
         form.setActive(voucher.isActive());
         form.setStartAt(voucher.getStartAt());
         form.setEndAt(voucher.getEndAt());
-        model.addAttribute("vouchers", adminService.getAllVouchers());
+        populateVouchersPage(model);
         model.addAttribute("voucherForm", form);
         return "admin/vouchers";
     }
@@ -241,7 +238,7 @@ public class AdminManagementController {
                               Model model,
                               RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("vouchers", adminService.getAllVouchers());
+            populateVouchersPage(model);
             return "admin/vouchers";
         }
         try {
@@ -249,7 +246,7 @@ public class AdminManagementController {
             redirectAttributes.addFlashAttribute("successMessage", "Lưu voucher thành công");
             return "redirect:/admin/vouchers";
         } catch (BusinessException ex) {
-            model.addAttribute("vouchers", adminService.getAllVouchers());
+            populateVouchersPage(model);
             model.addAttribute("errorMessage", ex.getMessage());
             return "admin/vouchers";
         }
@@ -264,8 +261,7 @@ public class AdminManagementController {
 
     @GetMapping("/banners")
     public String banners(Model model) {
-        model.addAttribute("banners", adminService.getAllBanners());
-        model.addAttribute("movies", movieRepository.findAll());
+        populateBannersPage(model);
         if (!model.containsAttribute("bannerForm")) {
             model.addAttribute("bannerForm", new AdminBannerRequest());
         }
@@ -274,7 +270,7 @@ public class AdminManagementController {
 
     @GetMapping("/banners/{bannerId}/edit")
     public String editBanner(@PathVariable Long bannerId, Model model) {
-        var banner = adminService.getAllBanners().stream().filter(b -> b.getId().equals(bannerId)).findFirst().orElseThrow();
+        var banner = adminService.getBannerById(bannerId);
         AdminBannerRequest form = new AdminBannerRequest();
         form.setId(banner.getId());
         form.setTitle(banner.getTitle());
@@ -285,8 +281,7 @@ public class AdminManagementController {
         form.setDisplayOrder(banner.getDisplayOrder());
         form.setActive(banner.isActive());
         form.setMovieId(banner.getMovie() == null ? null : banner.getMovie().getId());
-        model.addAttribute("banners", adminService.getAllBanners());
-        model.addAttribute("movies", movieRepository.findAll());
+        populateBannersPage(model);
         model.addAttribute("bannerForm", form);
         return "admin/banners";
     }
@@ -297,8 +292,7 @@ public class AdminManagementController {
                              Model model,
                              RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("banners", adminService.getAllBanners());
-            model.addAttribute("movies", movieRepository.findAll());
+            populateBannersPage(model);
             return "admin/banners";
         }
         adminService.saveBanner(request);
@@ -339,5 +333,27 @@ public class AdminManagementController {
         commentService.deleteComment(commentId);
         redirectAttributes.addFlashAttribute("successMessage", "Đã xóa bình luận");
         return "redirect:/admin/comments";
+    }
+
+    private void populateUsersPage(Model model) {
+        model.addAttribute("users", adminService.getAllUsers());
+        model.addAttribute("roles", roleRepository.findAll());
+    }
+
+    private void populateGenresPage(Model model) {
+        model.addAttribute("genres", adminService.getAllGenres());
+    }
+
+    private void populatePlansPage(Model model) {
+        model.addAttribute("plans", adminService.getAllPlans());
+    }
+
+    private void populateVouchersPage(Model model) {
+        model.addAttribute("vouchers", adminService.getAllVouchers());
+    }
+
+    private void populateBannersPage(Model model) {
+        model.addAttribute("banners", adminService.getAllBanners());
+        model.addAttribute("movies", movieRepository.findAll());
     }
 }

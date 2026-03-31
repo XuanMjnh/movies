@@ -2,10 +2,9 @@ package com.streaming.movieplatform.controller.admin;
 
 import com.streaming.movieplatform.dto.AdminEpisodeRequest;
 import com.streaming.movieplatform.dto.AdminMovieRequest;
+import com.streaming.movieplatform.entity.Episode;
 import com.streaming.movieplatform.entity.Movie;
-import com.streaming.movieplatform.repository.ActorRepository;
-import com.streaming.movieplatform.repository.CountryRepository;
-import com.streaming.movieplatform.repository.DirectorRepository;
+import com.streaming.movieplatform.exception.ResourceNotFoundException;
 import com.streaming.movieplatform.repository.EpisodeRepository;
 import com.streaming.movieplatform.repository.GenreRepository;
 import com.streaming.movieplatform.repository.MovieRepository;
@@ -21,31 +20,24 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.stream.Collectors;
+
 @Controller
 @RequestMapping("/admin/movies")
 public class AdminMovieController {
 
     private final MovieRepository movieRepository;
     private final EpisodeRepository episodeRepository;
-    private final CountryRepository countryRepository;
     private final GenreRepository genreRepository;
-    private final ActorRepository actorRepository;
-    private final DirectorRepository directorRepository;
     private final MovieService movieService;
 
     public AdminMovieController(MovieRepository movieRepository,
                                 EpisodeRepository episodeRepository,
-                                CountryRepository countryRepository,
                                 GenreRepository genreRepository,
-                                ActorRepository actorRepository,
-                                DirectorRepository directorRepository,
                                 MovieService movieService) {
         this.movieRepository = movieRepository;
         this.episodeRepository = episodeRepository;
-        this.countryRepository = countryRepository;
         this.genreRepository = genreRepository;
-        this.actorRepository = actorRepository;
-        this.directorRepository = directorRepository;
         this.movieService = movieService;
     }
 
@@ -63,7 +55,7 @@ public class AdminMovieController {
 
     @GetMapping("/{movieId}/edit")
     public String editForm(@PathVariable Long movieId, Model model) {
-        Movie movie = movieRepository.findWithDetailsById(movieId).orElseThrow();
+        Movie movie = getMovieWithDetailsOrThrow(movieId);
         AdminMovieRequest request = new AdminMovieRequest();
         request.setId(movie.getId());
         request.setTitle(movie.getTitle());
@@ -85,11 +77,11 @@ public class AdminMovieController {
         request.setActorNames(movie.getActors().stream()
                 .map(a -> a.getName())
                 .sorted()
-                .collect(java.util.stream.Collectors.joining(", ")));
+                .collect(Collectors.joining(", ")));
         request.setDirectorNames(movie.getDirectors().stream()
                 .map(d -> d.getName())
                 .sorted()
-                .collect(java.util.stream.Collectors.joining(", ")));
+                .collect(Collectors.joining(", ")));
         prepareMovieForm(model, request);
         return "admin/movie-form";
     }
@@ -117,19 +109,16 @@ public class AdminMovieController {
 
     @GetMapping("/{movieId}/episodes")
     public String episodes(@PathVariable Long movieId, Model model) {
-        Movie movie = movieRepository.findById(movieId).orElseThrow();
-        model.addAttribute("movie", movie);
-        model.addAttribute("episodes", episodeRepository.findByMovieIdOrderByEpisodeNumberAsc(movieId));
         AdminEpisodeRequest episodeForm = new AdminEpisodeRequest();
         episodeForm.setMovieId(movieId);
-        model.addAttribute("episodeForm", episodeForm);
+        populateEpisodePage(model, getMovieOrThrow(movieId), episodeForm);
         return "admin/episodes";
     }
 
     @GetMapping("/{movieId}/episodes/{episodeId}/edit")
     public String editEpisode(@PathVariable Long movieId, @PathVariable Long episodeId, Model model) {
-        Movie movie = movieRepository.findById(movieId).orElseThrow();
-        var episode = episodeRepository.findById(episodeId).orElseThrow();
+        Movie movie = getMovieOrThrow(movieId);
+        Episode episode = getEpisodeOrThrow(movieId, episodeId);
         AdminEpisodeRequest episodeForm = new AdminEpisodeRequest();
         episodeForm.setId(episode.getId());
         episodeForm.setMovieId(movieId);
@@ -139,9 +128,7 @@ public class AdminMovieController {
         episodeForm.setDurationMinutes(episode.getDurationMinutes());
         episodeForm.setFreePreview(episode.isFreePreview());
         episodeForm.setActive(episode.isActive());
-        model.addAttribute("movie", movie);
-        model.addAttribute("episodes", episodeRepository.findByMovieIdOrderByEpisodeNumberAsc(movieId));
-        model.addAttribute("episodeForm", episodeForm);
+        populateEpisodePage(model, movie, episodeForm);
         return "admin/episodes";
     }
 
@@ -151,9 +138,8 @@ public class AdminMovieController {
                               Model model,
                               RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            Movie movie = movieRepository.findById(request.getMovieId()).orElseThrow();
-            model.addAttribute("movie", movie);
-            model.addAttribute("episodes", episodeRepository.findByMovieIdOrderByEpisodeNumberAsc(request.getMovieId()));
+            Movie movie = getMovieOrThrow(request.getMovieId());
+            populateEpisodePage(model, movie, request);
             return "admin/episodes";
         }
         movieService.saveEpisode(request);
@@ -163,6 +149,7 @@ public class AdminMovieController {
 
     @PostMapping("/{movieId}/episodes/{episodeId}/delete")
     public String deleteEpisode(@PathVariable Long movieId, @PathVariable Long episodeId, RedirectAttributes redirectAttributes) {
+        getEpisodeOrThrow(movieId, episodeId);
         movieService.deleteEpisode(episodeId);
         redirectAttributes.addFlashAttribute("successMessage", "Đã xóa tập phim");
         return "redirect:/admin/movies/" + movieId + "/episodes";
@@ -173,5 +160,30 @@ public class AdminMovieController {
         model.addAttribute("genres", genreRepository.findAllByOrderByNameAsc());
         model.addAttribute("accessLevels", com.streaming.movieplatform.enums.AccessLevel.values());
         model.addAttribute("movieTypes", com.streaming.movieplatform.enums.MovieType.values());
+    }
+
+    private void populateEpisodePage(Model model, Movie movie, AdminEpisodeRequest request) {
+        model.addAttribute("movie", movie);
+        model.addAttribute("episodes", episodeRepository.findByMovieIdOrderByEpisodeNumberAsc(movie.getId()));
+        model.addAttribute("episodeForm", request);
+    }
+
+    private Movie getMovieOrThrow(Long movieId) {
+        return movieRepository.findById(movieId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phim"));
+    }
+
+    private Movie getMovieWithDetailsOrThrow(Long movieId) {
+        return movieRepository.findWithDetailsById(movieId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phim"));
+    }
+
+    private Episode getEpisodeOrThrow(Long movieId, Long episodeId) {
+        Episode episode = episodeRepository.findById(episodeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tập phim"));
+        if (!episode.getMovie().getId().equals(movieId)) {
+            throw new ResourceNotFoundException("Không tìm thấy tập phim thuộc bộ phim này");
+        }
+        return episode;
     }
 }

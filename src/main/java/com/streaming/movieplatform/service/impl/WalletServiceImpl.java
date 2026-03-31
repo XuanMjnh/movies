@@ -128,7 +128,7 @@ public class WalletServiceImpl implements WalletService {
         paymentTransaction.setStatus(TransactionStatus.PENDING);
         paymentTransactionRepository.save(paymentTransaction);
 
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = VnPayUtil.nowInVnPayZone();
         Map<String, String> params = new LinkedHashMap<>();
         params.put("vnp_Version", "2.1.0");
         params.put("vnp_Command", "pay");

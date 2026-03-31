@@ -52,6 +52,9 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
     List<Movie> findTop12ByActiveTrueOrderByViewCountDesc();
 
     @EntityGraph(attributePaths = {"genres", "country"})
+    List<Movie> findTop5ByOrderByViewCountDesc();
+
+    @EntityGraph(attributePaths = {"genres", "country"})
     List<Movie> findTop12ByAccessLevelAndActiveTrueOrderByCreatedAtDesc(AccessLevel accessLevel);
 
     @EntityGraph(attributePaths = {"genres", "country"})
