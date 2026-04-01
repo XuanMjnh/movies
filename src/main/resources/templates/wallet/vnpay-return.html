@@ -9,7 +9,11 @@
         <div class="col-xl-7 col-lg-8">
             <div class="glass-panel">
                 <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="display-6" th:text="${result.success} ? '✅' : (${result.pendingConfirmation} ? '⏳' : '❌')">✅</div>
+                    <div class="display-6">
+                        <i th:class="${result.success} ? 'bi bi-check-circle-fill text-success' 
+                            : (${result.pendingConfirmation} ? 'bi bi-hourglass-split text-warning' 
+                            : 'bi bi-x-circle-fill text-danger')"></i>
+                    </div>
                     <div>
                         <h1 class="h3 text-white mb-1">Kết quả thanh toán VNPAY</h1>
                         <p class="text-secondary mb-0" th:text="${result.message}">Thanh toán thành công.</p>
