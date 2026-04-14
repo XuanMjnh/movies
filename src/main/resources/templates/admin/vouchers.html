@@ -42,6 +42,30 @@
                                     <div class="col-md-6"><label class="form-label">Bắt đầu</label><input th:field="*{startAt}" type="datetime-local" class="form-control"></div>
                                     <div class="col-md-6"><label class="form-label">Kết thúc</label><input th:field="*{endAt}" type="datetime-local" class="form-control"></div>
                                 </div>
+                                <div class="border rounded-3 p-3">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" th:field="*{autoDisplayEnabled}">
+                                        <label class="form-check-label">Tự động hiển thị cho user đủ điều kiện</label>
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tổng đã chi tối thiểu</label>
+                                            <input th:field="*{minTotalSpentAmount}" type="number" min="0" step="0.01" class="form-control" placeholder="0 = không yêu cầu">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tuổi tài khoản tối thiểu (ngày)</label>
+                                            <input th:field="*{minAccountAgeDays}" type="number" min="0" class="form-control" placeholder="0 = không yêu cầu">
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <label class="form-label">Kiểu xét điều kiện</label>
+                                        <select th:field="*{audienceMatchMode}" class="form-select">
+                                            <option value="ALL">Phải đúng tất cả điều kiện</option>
+                                            <option value="ANY">Chỉ cần đúng một điều kiện</option>
+                                        </select>
+                                    </div>
+                                    
+                                </div>
                                 <button class="btn btn-accent">Lưu voucher</button>
                             </form>
                         </div>
@@ -58,10 +82,19 @@
                                             <div class="fw-semibold" th:text="${voucher.code}">GIAM50</div>
                                             <div class="small text-secondary" th:text="${voucher.name}">Tên</div>
                                             <div class="small text-secondary" th:text="${voucher.active ? 'Đang bật' : 'Đang tắt'}">Đang bật</div>
+                                            <div class="small text-secondary" th:text="${voucher.autoDisplayEnabled ? 'Tự hiển thị khi user đủ điều kiện' : 'Chỉ nhập mã thủ công'}">Tự hiển thị</div>
                                         </td>
                                         <td>
                                             <div th:text="${voucher.discountType.name() == 'PERCENT' ? (#numbers.formatDecimal(voucher.discountValue, 0, 'COMMA', 0, 'POINT') + '%') : (#numbers.formatDecimal(voucher.discountValue, 0, 'COMMA', 0, 'POINT') + ' đ')}">10%</div>
                                             <div class="small text-secondary">Đơn tối thiểu: <span th:text="${#numbers.formatDecimal(voucher.minOrderAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span></div>
+                                            <div class="small text-secondary" th:if="${voucher.minTotalSpentAmount != null and voucher.minTotalSpentAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                                                Đã chi tối thiểu: <span th:text="${#numbers.formatDecimal(voucher.minTotalSpentAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                                            </div>
+                                            <div class="small text-secondary" th:if="${voucher.minAccountAgeDays != null and voucher.minAccountAgeDays > 0}">
+                                                Tài khoản tối thiểu: <span th:text="${voucher.minAccountAgeDays} + ' ngày'">0 ngày</span>
+                                            </div>
+                                            <div class="small text-secondary" th:if="${voucher.minTotalSpentAmount != null and voucher.minTotalSpentAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0 and voucher.minAccountAgeDays != null and voucher.minAccountAgeDays > 0}"
+                                                 th:text="${voucher.audienceMatchMode.name() == 'ANY' ? 'Đúng 1 trong 2 điều kiện' : 'Phải đúng cả 2 điều kiện'}">Điều kiện</div>
                                         </td>
                                         <td>
                                             <div class="small" th:text="|${#temporals.format(voucher.startAt, 'dd/MM/yyyy HH:mm')} → ${#temporals.format(voucher.endAt, 'dd/MM/yyyy HH:mm')}|">date</div>

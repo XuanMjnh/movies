@@ -1,5 +1,6 @@
 package com.streaming.movieplatform.controller.auth;
 
+import com.streaming.movieplatform.controller.support.FormFlowSupport;
 import com.streaming.movieplatform.dto.ForgotPasswordRequest;
 import com.streaming.movieplatform.dto.RegisterRequest;
 import com.streaming.movieplatform.exception.BusinessException;
@@ -34,9 +35,7 @@ public class AuthController {
 
     @GetMapping("/register")
     public String registerPage(Model model) {
-        if (!model.containsAttribute("registerRequest")) {
-            model.addAttribute("registerRequest", new RegisterRequest());
-        }
+        FormFlowSupport.addIfAbsent(model, "registerRequest", RegisterRequest::new);
         return "auth/register";
     }
 
@@ -45,9 +44,7 @@ public class AuthController {
                            BindingResult bindingResult,
                            RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.registerRequest", bindingResult);
-            redirectAttributes.addFlashAttribute("registerRequest", request);
-            return "redirect:/register";
+            return FormFlowSupport.redirectWithValidationErrors(redirectAttributes, "/register", "registerRequest", request, bindingResult);
         }
         try {
             userService.register(request);
@@ -55,16 +52,14 @@ public class AuthController {
             return "redirect:/login";
         } catch (BusinessException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-            redirectAttributes.addFlashAttribute("registerRequest", request);
+            FormFlowSupport.flashForm(redirectAttributes, "registerRequest", request);
             return "redirect:/register";
         }
     }
 
     @GetMapping("/forgot-password")
     public String forgotPasswordPage(Model model) {
-        if (!model.containsAttribute("forgotPasswordRequest")) {
-            model.addAttribute("forgotPasswordRequest", new ForgotPasswordRequest());
-        }
+        FormFlowSupport.addIfAbsent(model, "forgotPasswordRequest", ForgotPasswordRequest::new);
         return "auth/forgot-password";
     }
 
@@ -73,9 +68,7 @@ public class AuthController {
                                  BindingResult bindingResult,
                                  RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.forgotPasswordRequest", bindingResult);
-            redirectAttributes.addFlashAttribute("forgotPasswordRequest", request);
-            return "redirect:/forgot-password";
+            return FormFlowSupport.redirectWithValidationErrors(redirectAttributes, "/forgot-password", "forgotPasswordRequest", request, bindingResult);
         }
         try {
             userService.resetPassword(request);
@@ -83,7 +76,7 @@ public class AuthController {
             return "redirect:/login";
         } catch (BusinessException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-            redirectAttributes.addFlashAttribute("forgotPasswordRequest", request);
+            FormFlowSupport.flashForm(redirectAttributes, "forgotPasswordRequest", request);
             return "redirect:/forgot-password";
         }
     }

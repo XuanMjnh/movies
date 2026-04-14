@@ -55,34 +55,7 @@ public class AdminMovieController {
 
     @GetMapping("/{movieId}/edit")
     public String editForm(@PathVariable Long movieId, Model model) {
-        Movie movie = getMovieWithDetailsOrThrow(movieId);
-        AdminMovieRequest request = new AdminMovieRequest();
-        request.setId(movie.getId());
-        request.setTitle(movie.getTitle());
-        request.setOriginalTitle(movie.getOriginalTitle());
-        request.setShortDescription(movie.getShortDescription());
-        request.setDescription(movie.getDescription());
-        request.setReleaseYear(movie.getReleaseYear());
-        request.setDurationMinutes(movie.getDurationMinutes());
-        request.setMovieType(movie.getMovieType());
-        request.setAccessLevel(movie.getAccessLevel());
-        request.setTrailerUrl(movie.getTrailerUrl());
-        request.setPosterUrl(movie.getPosterUrl());
-        request.setBackdropUrl(movie.getBackdropUrl());
-        request.setFeatured(movie.isFeatured());
-        request.setPopular(movie.isPopular());
-        request.setActive(movie.isActive());
-        request.setGenreIds(movie.getGenres().stream().map(g -> g.getId()).toList());
-        request.setCountryName(movie.getCountry() == null ? "" : movie.getCountry().getName());
-        request.setActorNames(movie.getActors().stream()
-                .map(a -> a.getName())
-                .sorted()
-                .collect(Collectors.joining(", ")));
-        request.setDirectorNames(movie.getDirectors().stream()
-                .map(d -> d.getName())
-                .sorted()
-                .collect(Collectors.joining(", ")));
-        prepareMovieForm(model, request);
+        prepareMovieForm(model, createMovieForm(getMovieWithDetailsOrThrow(movieId)));
         return "admin/movie-form";
     }
 
@@ -109,26 +82,14 @@ public class AdminMovieController {
 
     @GetMapping("/{movieId}/episodes")
     public String episodes(@PathVariable Long movieId, Model model) {
-        AdminEpisodeRequest episodeForm = new AdminEpisodeRequest();
-        episodeForm.setMovieId(movieId);
-        populateEpisodePage(model, getMovieOrThrow(movieId), episodeForm);
+        populateEpisodePage(model, getMovieOrThrow(movieId), createEpisodeForm(movieId));
         return "admin/episodes";
     }
 
     @GetMapping("/{movieId}/episodes/{episodeId}/edit")
     public String editEpisode(@PathVariable Long movieId, @PathVariable Long episodeId, Model model) {
         Movie movie = getMovieOrThrow(movieId);
-        Episode episode = getEpisodeOrThrow(movieId, episodeId);
-        AdminEpisodeRequest episodeForm = new AdminEpisodeRequest();
-        episodeForm.setId(episode.getId());
-        episodeForm.setMovieId(movieId);
-        episodeForm.setEpisodeNumber(episode.getEpisodeNumber());
-        episodeForm.setTitle(episode.getTitle());
-        episodeForm.setVideoUrl(episode.getVideoUrl());
-        episodeForm.setDurationMinutes(episode.getDurationMinutes());
-        episodeForm.setFreePreview(episode.isFreePreview());
-        episodeForm.setActive(episode.isActive());
-        populateEpisodePage(model, movie, episodeForm);
+        populateEpisodePage(model, movie, createEpisodeForm(getEpisodeOrThrow(movieId, episodeId), movieId));
         return "admin/episodes";
     }
 
@@ -160,6 +121,54 @@ public class AdminMovieController {
         model.addAttribute("genres", genreRepository.findAllByOrderByNameAsc());
         model.addAttribute("accessLevels", com.streaming.movieplatform.enums.AccessLevel.values());
         model.addAttribute("movieTypes", com.streaming.movieplatform.enums.MovieType.values());
+    }
+
+    private AdminMovieRequest createMovieForm(Movie movie) {
+        AdminMovieRequest request = new AdminMovieRequest();
+        request.setId(movie.getId());
+        request.setTitle(movie.getTitle());
+        request.setOriginalTitle(movie.getOriginalTitle());
+        request.setShortDescription(movie.getShortDescription());
+        request.setDescription(movie.getDescription());
+        request.setReleaseYear(movie.getReleaseYear());
+        request.setDurationMinutes(movie.getDurationMinutes());
+        request.setMovieType(movie.getMovieType());
+        request.setAccessLevel(movie.getAccessLevel());
+        request.setTrailerUrl(movie.getTrailerUrl());
+        request.setPosterUrl(movie.getPosterUrl());
+        request.setBackdropUrl(movie.getBackdropUrl());
+        request.setFeatured(movie.isFeatured());
+        request.setPopular(movie.isPopular());
+        request.setActive(movie.isActive());
+        request.setGenreIds(movie.getGenres().stream().map(genre -> genre.getId()).toList());
+        request.setCountryName(movie.getCountry() == null ? "" : movie.getCountry().getName());
+        request.setActorNames(movie.getActors().stream()
+                .map(actor -> actor.getName())
+                .sorted()
+                .collect(Collectors.joining(", ")));
+        request.setDirectorNames(movie.getDirectors().stream()
+                .map(director -> director.getName())
+                .sorted()
+                .collect(Collectors.joining(", ")));
+        return request;
+    }
+
+    private AdminEpisodeRequest createEpisodeForm(Long movieId) {
+        AdminEpisodeRequest episodeForm = new AdminEpisodeRequest();
+        episodeForm.setMovieId(movieId);
+        return episodeForm;
+    }
+
+    private AdminEpisodeRequest createEpisodeForm(Episode episode, Long movieId) {
+        AdminEpisodeRequest episodeForm = createEpisodeForm(movieId);
+        episodeForm.setId(episode.getId());
+        episodeForm.setEpisodeNumber(episode.getEpisodeNumber());
+        episodeForm.setTitle(episode.getTitle());
+        episodeForm.setVideoUrl(episode.getVideoUrl());
+        episodeForm.setDurationMinutes(episode.getDurationMinutes());
+        episodeForm.setFreePreview(episode.isFreePreview());
+        episodeForm.setActive(episode.isActive());
+        return episodeForm;
     }
 
     private void populateEpisodePage(Model model, Movie movie, AdminEpisodeRequest request) {

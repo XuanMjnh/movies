@@ -1,10 +1,12 @@
 package com.streaming.movieplatform.controller.user;
 
+import com.streaming.movieplatform.controller.support.FormFlowSupport;
 import com.streaming.movieplatform.dto.CommentRequest;
 import com.streaming.movieplatform.dto.PasswordChangeRequest;
 import com.streaming.movieplatform.dto.ProfileUpdateRequest;
 import com.streaming.movieplatform.dto.RatingRequest;
 import com.streaming.movieplatform.dto.WatchProgressRequest;
+import com.streaming.movieplatform.entity.User;
 import com.streaming.movieplatform.exception.BusinessException;
 import com.streaming.movieplatform.service.CommentService;
 import com.streaming.movieplatform.service.MovieService;
@@ -43,16 +45,8 @@ public class UserController {
     @GetMapping("/profile")
     public String profile(Model model) {
         var user = userService.getCurrentUser();
-        if (!model.containsAttribute("profileUpdateRequest")) {
-            ProfileUpdateRequest profileUpdateRequest = new ProfileUpdateRequest();
-            profileUpdateRequest.setFullName(user.getFullName());
-            profileUpdateRequest.setEmail(user.getEmail());
-            profileUpdateRequest.setPhone(user.getPhone());
-            model.addAttribute("profileUpdateRequest", profileUpdateRequest);
-        }
-        if (!model.containsAttribute("passwordChangeRequest")) {
-            model.addAttribute("passwordChangeRequest", new PasswordChangeRequest());
-        }
+        FormFlowSupport.addIfAbsent(model, "profileUpdateRequest", () -> createProfileUpdateRequest(user));
+        FormFlowSupport.addIfAbsent(model, "passwordChangeRequest", PasswordChangeRequest::new);
         model.addAttribute("activeSubscription", userService.getCurrentSubscription(user));
         model.addAttribute("remainingDays", userService.getRemainingSubscriptionDays(user));
         return "user/profile";
@@ -63,9 +57,7 @@ public class UserController {
                                 BindingResult bindingResult,
                                 RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.profileUpdateRequest", bindingResult);
-            redirectAttributes.addFlashAttribute("profileUpdateRequest", request);
-            return "redirect:/user/profile";
+            return FormFlowSupport.redirectWithValidationErrors(redirectAttributes, "/user/profile", "profileUpdateRequest", request, bindingResult);
         }
         try {
             userService.updateProfile(request);
@@ -81,9 +73,7 @@ public class UserController {
                                  BindingResult bindingResult,
                                  RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.passwordChangeRequest", bindingResult);
-            redirectAttributes.addFlashAttribute("passwordChangeRequest", request);
-            return "redirect:/user/profile";
+            return FormFlowSupport.redirectWithValidationErrors(redirectAttributes, "/user/profile", "passwordChangeRequest", request, bindingResult);
         }
         try {
             userService.changePassword(request);
@@ -162,5 +152,13 @@ public class UserController {
         movieService.submitRating(userService.getCurrentUser(), movieId, request.getStars());
         redirectAttributes.addFlashAttribute("successMessage", "Đã gửi đánh giá sao cho phim");
         return "redirect:/movies/" + movieId;
+    }
+
+    private ProfileUpdateRequest createProfileUpdateRequest(User user) {
+        ProfileUpdateRequest profileUpdateRequest = new ProfileUpdateRequest();
+        profileUpdateRequest.setFullName(user.getFullName());
+        profileUpdateRequest.setEmail(user.getEmail());
+        profileUpdateRequest.setPhone(user.getPhone());
+        return profileUpdateRequest;
     }
 }

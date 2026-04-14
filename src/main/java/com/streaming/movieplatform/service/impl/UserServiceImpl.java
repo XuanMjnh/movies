@@ -10,14 +10,13 @@ import com.streaming.movieplatform.entity.UserSubscription;
 import com.streaming.movieplatform.entity.Wallet;
 import com.streaming.movieplatform.enums.AccessLevel;
 import com.streaming.movieplatform.enums.RoleName;
-import com.streaming.movieplatform.enums.SubscriptionStatus;
 import com.streaming.movieplatform.exception.BusinessException;
 import com.streaming.movieplatform.exception.ResourceNotFoundException;
 import com.streaming.movieplatform.repository.RoleRepository;
 import com.streaming.movieplatform.repository.UserRepository;
-import com.streaming.movieplatform.repository.UserSubscriptionRepository;
 import com.streaming.movieplatform.repository.WalletRepository;
 import com.streaming.movieplatform.service.StorageService;
+import com.streaming.movieplatform.service.SubscriptionService;
 import com.streaming.movieplatform.service.UserService;
 import com.streaming.movieplatform.util.CurrentUserUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,22 +34,22 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final WalletRepository walletRepository;
-    private final UserSubscriptionRepository userSubscriptionRepository;
     private final PasswordEncoder passwordEncoder;
     private final StorageService storageService;
+    private final SubscriptionService subscriptionService;
 
     public UserServiceImpl(UserRepository userRepository,
                            RoleRepository roleRepository,
                            WalletRepository walletRepository,
-                           UserSubscriptionRepository userSubscriptionRepository,
                            PasswordEncoder passwordEncoder,
-                           StorageService storageService) {
+                           StorageService storageService,
+                           SubscriptionService subscriptionService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.walletRepository = walletRepository;
-        this.userSubscriptionRepository = userSubscriptionRepository;
         this.passwordEncoder = passwordEncoder;
         this.storageService = storageService;
+        this.subscriptionService = subscriptionService;
     }
 
     @Override
@@ -149,21 +148,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserSubscription getCurrentSubscription(User user) {
-        if (user == null) {
-            return null;
-        }
-        UserSubscription subscription = userSubscriptionRepository
-                .findFirstByUserIdAndStatusOrderByEndDateDesc(user.getId(), SubscriptionStatus.ACTIVE)
-                .orElse(null);
-        if (subscription == null) {
-            return null;
-        }
-        if (subscription.getEndDate().isBefore(LocalDate.now())) {
-            subscription.setStatus(SubscriptionStatus.EXPIRED);
-            userSubscriptionRepository.save(subscription);
-            return null;
-        }
-        return subscription;
+        return subscriptionService.getCurrentSubscription(user);
     }
 
     @Override

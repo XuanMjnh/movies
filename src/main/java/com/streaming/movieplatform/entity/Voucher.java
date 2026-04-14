@@ -1,5 +1,6 @@
 package com.streaming.movieplatform.entity;
 
+import com.streaming.movieplatform.enums.VoucherAudienceMatchMode;
 import com.streaming.movieplatform.enums.VoucherDiscountType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,6 +45,19 @@ public class Voucher extends BaseEntity {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    @Column(name = "auto_display_enabled", nullable = false)
+    private boolean autoDisplayEnabled = false;
+
+    @Column(name = "min_total_spent_amount", nullable = false, precision = 15, scale = 2)
+    private BigDecimal minTotalSpentAmount = BigDecimal.ZERO;
+
+    @Column(name = "min_account_age_days", nullable = false)
+    private Integer minAccountAgeDays = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "audience_match_mode", nullable = false, length = 10)
+    private VoucherAudienceMatchMode audienceMatchMode = VoucherAudienceMatchMode.ALL;
 
     @Column(name = "start_at", nullable = false)
     private LocalDateTime startAt;
@@ -129,6 +143,38 @@ public class Voucher extends BaseEntity {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public boolean isAutoDisplayEnabled() {
+        return autoDisplayEnabled;
+    }
+
+    public void setAutoDisplayEnabled(boolean autoDisplayEnabled) {
+        this.autoDisplayEnabled = autoDisplayEnabled;
+    }
+
+    public BigDecimal getMinTotalSpentAmount() {
+        return minTotalSpentAmount;
+    }
+
+    public void setMinTotalSpentAmount(BigDecimal minTotalSpentAmount) {
+        this.minTotalSpentAmount = minTotalSpentAmount;
+    }
+
+    public Integer getMinAccountAgeDays() {
+        return minAccountAgeDays;
+    }
+
+    public void setMinAccountAgeDays(Integer minAccountAgeDays) {
+        this.minAccountAgeDays = minAccountAgeDays;
+    }
+
+    public VoucherAudienceMatchMode getAudienceMatchMode() {
+        return audienceMatchMode;
+    }
+
+    public void setAudienceMatchMode(VoucherAudienceMatchMode audienceMatchMode) {
+        this.audienceMatchMode = audienceMatchMode;
     }
 
     public LocalDateTime getStartAt() {

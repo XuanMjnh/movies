@@ -21,6 +21,7 @@ import com.streaming.movieplatform.enums.RoleName;
 import com.streaming.movieplatform.enums.SubscriptionStatus;
 import com.streaming.movieplatform.enums.TransactionStatus;
 import com.streaming.movieplatform.enums.TransactionType;
+import com.streaming.movieplatform.enums.VoucherAudienceMatchMode;
 import com.streaming.movieplatform.exception.BusinessException;
 import com.streaming.movieplatform.exception.ResourceNotFoundException;
 import com.streaming.movieplatform.repository.BannerRepository;
@@ -330,6 +331,11 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public Voucher saveVoucher(AdminVoucherRequest request) {
+        BigDecimal minTotalSpentAmount = request.getMinTotalSpentAmount() == null ? BigDecimal.ZERO : request.getMinTotalSpentAmount();
+        Integer minAccountAgeDays = request.getMinAccountAgeDays() == null ? 0 : request.getMinAccountAgeDays();
+        VoucherAudienceMatchMode audienceMatchMode = request.getAudienceMatchMode() == null
+                ? VoucherAudienceMatchMode.ALL
+                : request.getAudienceMatchMode();
         if (request.getEndAt().isBefore(request.getStartAt()) || request.getEndAt().isEqual(request.getStartAt())) {
             throw new BusinessException("Thời gian kết thúc phải sau thời gian bắt đầu");
         }
@@ -341,6 +347,13 @@ public class AdminServiceImpl implements AdminService {
         }
         if (request.getDiscountType().name().equals("PERCENT") && request.getDiscountValue().compareTo(new BigDecimal("100")) > 0) {
             throw new BusinessException("Voucher theo phần trăm không được lớn hơn 100");
+        }
+
+        if (minTotalSpentAmount.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessException("Tổng chi tiêu tối thiểu không được âm");
+        }
+        if (minAccountAgeDays < 0) {
+            throw new BusinessException("Tuổi tài khoản tối thiểu không được âm");
         }
 
         String normalizedCode = request.getCode().trim().toUpperCase(Locale.ROOT);
@@ -361,6 +374,10 @@ public class AdminServiceImpl implements AdminService {
         voucher.setMinOrderAmount(request.getMinOrderAmount());
         voucher.setQuantity(request.getQuantity());
         voucher.setActive(request.isActive());
+        voucher.setMinTotalSpentAmount(minTotalSpentAmount);
+        voucher.setMinAccountAgeDays(minAccountAgeDays);
+        voucher.setAudienceMatchMode(audienceMatchMode);
+        voucher.setAutoDisplayEnabled(request.isAutoDisplayEnabled());
         voucher.setStartAt(request.getStartAt());
         voucher.setEndAt(request.getEndAt());
         if (voucher.getUsedCount() == null) {

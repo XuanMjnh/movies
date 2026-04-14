@@ -1,5 +1,6 @@
 package com.streaming.movieplatform.controller.user;
 
+import com.streaming.movieplatform.controller.support.FormFlowSupport;
 import com.streaming.movieplatform.dto.DepositRequest;
 import com.streaming.movieplatform.exception.BusinessException;
 import com.streaming.movieplatform.service.WalletService;
@@ -37,9 +38,7 @@ public class WalletController {
 
     @GetMapping("/deposit")
     public String depositPage(Model model) {
-        if (!model.containsAttribute("depositRequest")) {
-            model.addAttribute("depositRequest", new DepositRequest());
-        }
+        FormFlowSupport.addIfAbsent(model, "depositRequest", DepositRequest::new);
         model.addAttribute("wallet", walletService.getWallet(userService.getCurrentUser()));
         return "wallet/deposit";
     }
@@ -50,9 +49,7 @@ public class WalletController {
                           HttpServletRequest httpServletRequest,
                           RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.depositRequest", bindingResult);
-            redirectAttributes.addFlashAttribute("depositRequest", request);
-            return "redirect:/user/wallet/deposit";
+            return FormFlowSupport.redirectWithValidationErrors(redirectAttributes, "/user/wallet/deposit", "depositRequest", request, bindingResult);
         }
         try {
             String paymentUrl = walletService.createVnPayDepositPaymentUrl(
@@ -63,7 +60,7 @@ public class WalletController {
             return "redirect:" + paymentUrl;
         } catch (BusinessException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-            redirectAttributes.addFlashAttribute("depositRequest", request);
+            FormFlowSupport.flashForm(redirectAttributes, "depositRequest", request);
             return "redirect:/user/wallet/deposit";
         }
     }

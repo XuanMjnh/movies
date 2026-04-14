@@ -17,6 +17,48 @@
             <a class="btn btn-outline-light mt-3" th:href="@{/user/wallet/deposit}" sec:authorize="isAuthenticated()">Nạp tiền qua VNPAY trước khi mua gói</a>
         </div>
     </div>
+    <section sec:authorize="isAuthenticated()" th:if="${eligibleVouchers != null and !eligibleVouchers.isEmpty()}" class="mb-5">
+        <div class="glass-panel">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+                <div>
+                    <div class="eyebrow mb-2">VOUCHER FOR YOU</div>
+                    <h2 class="h4 text-white mb-1">Voucher dành cho bạn</h2>
+                    <p class="text-secondary mb-0">Bấm chọn mã để điền nhanh vào ô voucher khi thanh toán.</p>
+                </div>
+            </div>
+            <div class="row g-3">
+                <div class="col-lg-4" th:each="voucher : ${eligibleVouchers}">
+                    <div class="glass-panel h-100">
+                        <div class="d-flex justify-content-between gap-3 align-items-start">
+                            <div>
+                                <div class="small text-secondary">Mã voucher</div>
+                                <div class="h5 text-white mb-1" th:text="${voucher.code}">GIAM50</div>
+                                <div class="small text-secondary" th:text="${voucher.name}">Tên voucher</div>
+                            </div>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-light js-apply-voucher-code"
+                                    th:attr="data-voucher-code=${voucher.code},
+                                             data-discount-type=${voucher.discountType},
+                                             data-discount-value=${voucher.discountValue},
+                                             data-max-discount=${voucher.maxDiscountAmount},
+                                             data-min-order-amount=${voucher.minOrderAmount}">Dùng mã</button>
+                        </div>
+                        <div class="small text-secondary mt-3" th:if="${voucher.description != null and !#strings.isEmpty(voucher.description)}" th:text="${voucher.description}">Mô tả</div>
+                        <div class="small text-white mt-3" th:text="${voucher.discountType.name() == 'PERCENT' ? ('Giảm ' + #numbers.formatDecimal(voucher.discountValue, 0, 'COMMA', 0, 'POINT') + '%') : ('Giảm ' + #numbers.formatDecimal(voucher.discountValue, 0, 'COMMA', 0, 'POINT') + ' đ')}">Giảm 10%</div>
+                        <div class="small text-secondary mt-2">Đơn tối thiểu: <span th:text="${#numbers.formatDecimal(voucher.minOrderAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span></div>
+                        <div class="small text-secondary" th:if="${voucher.minTotalSpentAmount != null and voucher.minTotalSpentAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                            Yêu cầu đã chi: <span th:text="${#numbers.formatDecimal(voucher.minTotalSpentAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                        </div>
+                        <div class="small text-secondary" th:if="${voucher.minAccountAgeDays != null and voucher.minAccountAgeDays > 0}">
+                            Tuổi tài khoản: <span th:text="${voucher.minAccountAgeDays} + ' ngày'">0 ngày</span>
+                        </div>
+                        <div class="small text-secondary" th:if="${voucher.minTotalSpentAmount != null and voucher.minTotalSpentAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0 and voucher.minAccountAgeDays != null and voucher.minAccountAgeDays > 0}"
+                             th:text="${voucher.audienceMatchMode.name() == 'ANY' ? 'Chỉ cần đúng 1 trong 2 điều kiện' : 'Cần đúng cả 2 điều kiện'}">Điều kiện</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
     <div class="row g-4 justify-content-center">
         <div class="col-lg-4" th:each="plan : ${plans}">
             <div class="pricing-card h-100" th:classappend="${plan.accessLevel.name() == 'PREMIUM'} ? ' pricing-card-featured'">
@@ -24,7 +66,10 @@
                     <h2 class="h3 text-white mb-0" th:text="${plan.name}">Free</h2>
                     <span class="badge" th:classappend="${plan.accessLevel.name() == 'PREMIUM' ? ' text-bg-danger' : (plan.accessLevel.name() == 'STANDARD' ? ' text-bg-warning' : ' text-bg-success')}" th:text="${plan.accessLevel}">FREE</span>
                 </div>
-                <div class="display-5 fw-bold text-white mb-2" th:text="${#numbers.formatDecimal(plan.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                <div class="display-5 fw-bold text-white mb-2 js-plan-price"
+                     th:attr="data-base-price=${plan.price}"
+                     th:text="${#numbers.formatDecimal(plan.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                <div class="small text-accent mb-2 d-none js-plan-discount-summary">Giá sau giảm: 0 đ</div>
                 <div class="text-secondary mb-4">Hiệu lực <span th:text="${plan.durationDays}">30</span> ngày</div>
                 <ul class="list-unstyled pricing-features mb-4">
                     <li th:each="feature : ${#strings.arraySplit(plan.featureDescription, ';')}">
@@ -36,7 +81,7 @@
                         <input type="text" name="voucherCode" class="form-control js-voucher-input" placeholder="Nhập mã voucher nếu có">
                         <button class="btn btn-accent w-100 btn-lg js-open-purchase-modal"
                                 type="button"
-                                th:disabled="${currentSubscription != null and currentSubscription.plan.id == plan.id}"
+                                th:disabled="${currentSubscription != null and (currentSubscription.plan.id == plan.id or currentSubscription.plan.accessLevel.ordinal() > plan.accessLevel.ordinal())}"
                                 th:attr="data-plan-id=${plan.id},
                                          data-plan-name=${plan.name},
                                          data-plan-price=${plan.price},
@@ -44,7 +89,10 @@
                                          data-wallet-balance=${walletBalance}">
                             <span th:text="${currentSubscription != null and currentSubscription.plan.id == plan.id ? 'Đang sử dụng' : 'Mua ngay'}">Mua ngay</span>
                         </button>
-                        <div class="small text-secondary">Voucher được áp trực tiếp khi thanh toán nếu còn hạn và còn lượt dùng.</div>
+                        <div class="small text-secondary"
+                             th:text="${currentSubscription != null and currentSubscription.plan.accessLevel.ordinal() > plan.accessLevel.ordinal() ? 'Bạn đang dùng gói cao hơn nên không thể mua xuống gói này.' : 'Voucher được áp trực tiếp khi thanh toán nếu còn hạn và còn lượt dùng.'}">
+                            Voucher được áp trực tiếp khi thanh toán nếu còn hạn và còn lượt dùng.
+                        </div>
                     </form>
                 </div>
                 <div sec:authorize="isAnonymous()">
@@ -113,8 +161,84 @@
         const confirmBalanceHint = document.getElementById('confirmBalanceHint');
         const confirmPurchaseButton = document.getElementById('confirmPurchaseButton');
         let pendingForm = null;
+        let selectedVoucher = null;
 
         const formatMoney = (value) => new Intl.NumberFormat('vi-VN').format(Number(value || 0)) + ' đ';
+        const parseMoney = (value) => {
+            if (value === undefined || value === null || value === '') {
+                return null;
+            }
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : null;
+        };
+
+        const calculateDiscount = (price, voucher) => {
+            if (!voucher) {
+                return 0;
+            }
+
+            const minOrderAmount = parseMoney(voucher.minOrderAmount) || 0;
+            if (price < minOrderAmount) {
+                return 0;
+            }
+
+            let discount = 0;
+            if (voucher.discountType === 'PERCENT') {
+                discount = price * ((parseMoney(voucher.discountValue) || 0) / 100);
+            } else {
+                discount = parseMoney(voucher.discountValue) || 0;
+            }
+
+            const maxDiscount = parseMoney(voucher.maxDiscount);
+            if (maxDiscount !== null) {
+                discount = Math.min(discount, maxDiscount);
+            }
+
+            return Math.max(0, Math.min(discount, price));
+        };
+
+        const updatePlanPricePreview = () => {
+            document.querySelectorAll('.js-purchase-form').forEach(form => {
+                const card = form.closest('.pricing-card');
+                const priceElement = card.querySelector('.js-plan-price');
+                const summaryElement = card.querySelector('.js-plan-discount-summary');
+                const basePrice = Number(priceElement.dataset.basePrice || 0);
+                const discount = calculateDiscount(basePrice, selectedVoucher);
+                const finalPrice = Math.max(0, basePrice - discount);
+
+                priceElement.textContent = formatMoney(finalPrice);
+                if (selectedVoucher && discount > 0) {
+                    summaryElement.textContent = `Giá sau giảm: ${formatMoney(finalPrice)} (giảm ${formatMoney(discount)})`;
+                    summaryElement.classList.remove('d-none');
+                } else if (selectedVoucher) {
+                    summaryElement.textContent = 'Voucher này chưa áp dụng được cho gói hiện tại.';
+                    summaryElement.classList.remove('d-none');
+                } else {
+                    summaryElement.textContent = '';
+                    summaryElement.classList.add('d-none');
+                }
+            });
+        };
+
+        document.querySelectorAll('.js-apply-voucher-code').forEach(button => {
+            button.addEventListener('click', () => {
+                const voucherCode = button.dataset.voucherCode || '';
+                if (!voucherCode) {
+                    return;
+                }
+                selectedVoucher = {
+                    code: voucherCode,
+                    discountType: button.dataset.discountType,
+                    discountValue: button.dataset.discountValue,
+                    maxDiscount: button.dataset.maxDiscount,
+                    minOrderAmount: button.dataset.minOrderAmount
+                };
+                document.querySelectorAll('.js-voucher-input').forEach(input => {
+                    input.value = voucherCode;
+                });
+                updatePlanPricePreview();
+            });
+        });
 
         document.querySelectorAll('.js-open-purchase-modal').forEach(button => {
             button.addEventListener('click', () => {
@@ -124,20 +248,35 @@
                 const planName = button.dataset.planName || '';
                 const duration = button.dataset.planDuration || '0';
                 const price = Number(button.dataset.planPrice || 0);
+                const discount = selectedVoucher && selectedVoucher.code === voucherCode
+                    ? calculateDiscount(price, selectedVoucher)
+                    : 0;
+                const finalPrice = Math.max(0, price - discount);
                 const walletBalance = Number(button.dataset.walletBalance || 0);
-                const enoughBalance = walletBalance >= price;
+                const enoughBalance = walletBalance >= finalPrice;
 
                 pendingForm = form;
                 confirmPlanName.textContent = planName;
                 confirmPlanDuration.textContent = duration + ' ngày';
-                confirmPlanPrice.textContent = formatMoney(price);
+                confirmPlanPrice.textContent = discount > 0
+                    ? `${formatMoney(finalPrice)} (đã giảm ${formatMoney(discount)})`
+                    : formatMoney(price);
                 confirmWalletBalance.textContent = formatMoney(walletBalance);
                 confirmVoucherCode.textContent = voucherCode || 'Không áp dụng';
                 confirmBalanceHint.textContent = enoughBalance
                     ? 'Số dư hiện tại có thể thanh toán gói này. Voucher sẽ được backend kiểm tra khi xác nhận mua.'
-                    : 'Số dư hiện tại có thể chưa đủ. Nếu voucher không hợp lệ hoặc giảm không đủ, giao dịch sẽ bị từ chối.';
+                    : 'Số dư hiện tại có thể chưa đủ sau khi áp voucher. Nếu voucher không hợp lệ hoặc giảm không đủ, giao dịch sẽ bị từ chối.';
                 confirmBalanceHint.className = enoughBalance ? 'small mt-3 text-secondary' : 'small mt-3 text-danger';
                 purchaseModal.show();
+            });
+        });
+
+        document.querySelectorAll('.js-voucher-input').forEach(input => {
+            input.addEventListener('input', () => {
+                if (!selectedVoucher || input.value.trim().toUpperCase() !== selectedVoucher.code.toUpperCase()) {
+                    selectedVoucher = null;
+                    updatePlanPricePreview();
+                }
             });
         });
 

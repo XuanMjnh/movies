@@ -3,6 +3,7 @@ package com.streaming.movieplatform.controller.movie;
 import com.streaming.movieplatform.dto.CommentRequest;
 import com.streaming.movieplatform.dto.MovieFilterRequest;
 import com.streaming.movieplatform.dto.RatingRequest;
+import com.streaming.movieplatform.entity.Episode;
 import com.streaming.movieplatform.entity.Movie;
 import com.streaming.movieplatform.entity.User;
 import com.streaming.movieplatform.repository.CountryRepository;
@@ -47,10 +48,7 @@ public class MovieController {
     @GetMapping
     public String list(@ModelAttribute("filter") MovieFilterRequest filter, Model model) {
         model.addAttribute("moviePage", movieService.searchMovies(filter));
-        model.addAttribute("genres", genreRepository.findAllByOrderByNameAsc());
-        model.addAttribute("countries", countryRepository.findAllByOrderByNameAsc());
-        model.addAttribute("accessLevels", com.streaming.movieplatform.enums.AccessLevel.values());
-        model.addAttribute("movieTypes", com.streaming.movieplatform.enums.MovieType.values());
+        populateMovieListOptions(model);
         return "movie/list";
     }
 
@@ -58,14 +56,7 @@ public class MovieController {
     public String detail(@PathVariable Long movieId, Model model) {
         Movie movie = movieService.getMovieDetails(movieId);
         User currentUser = userService.getCurrentUser();
-        model.addAttribute("movie", movie);
-        model.addAttribute("episodes", episodeRepository.findByMovieIdAndActiveTrueOrderByEpisodeNumberAsc(movieId));
-        model.addAttribute("relatedMovies", movieService.getRelatedMovies(movie));
-        model.addAttribute("comments", commentService.getVisibleComments(movieId));
-        model.addAttribute("commentRequest", new CommentRequest());
-        model.addAttribute("ratingRequest", new RatingRequest());
-        model.addAttribute("canWatch", movieService.canWatch(currentUser, movie));
-        model.addAttribute("isFavorite", movieService.isFavorite(currentUser, movieId));
+        populateMovieDetailModel(model, movie, currentUser);
         return "movie/detail";
     }
 
@@ -82,11 +73,33 @@ public class MovieController {
             movieService.saveWatchProgress(currentUser, episode.getId(), 0, false);
         }
 
+        populateMovieWatchModel(model, movie, movieId, episode, canWatch);
+        return "movie/watch";
+    }
+
+    private void populateMovieListOptions(Model model) {
+        model.addAttribute("genres", genreRepository.findAllByOrderByNameAsc());
+        model.addAttribute("countries", countryRepository.findAllByOrderByNameAsc());
+        model.addAttribute("accessLevels", com.streaming.movieplatform.enums.AccessLevel.values());
+        model.addAttribute("movieTypes", com.streaming.movieplatform.enums.MovieType.values());
+    }
+
+    private void populateMovieDetailModel(Model model, Movie movie, User currentUser) {
+        model.addAttribute("movie", movie);
+        model.addAttribute("episodes", episodeRepository.findByMovieIdAndActiveTrueOrderByEpisodeNumberAsc(movie.getId()));
+        model.addAttribute("relatedMovies", movieService.getRelatedMovies(movie));
+        model.addAttribute("comments", commentService.getVisibleComments(movie.getId()));
+        model.addAttribute("commentRequest", new CommentRequest());
+        model.addAttribute("ratingRequest", new RatingRequest());
+        model.addAttribute("canWatch", movieService.canWatch(currentUser, movie));
+        model.addAttribute("isFavorite", movieService.isFavorite(currentUser, movie.getId()));
+    }
+
+    private void populateMovieWatchModel(Model model, Movie movie, Long movieId, Episode currentEpisode, boolean canWatch) {
         model.addAttribute("movie", movie);
         model.addAttribute("episodes", episodeRepository.findByMovieIdAndActiveTrueOrderByEpisodeNumberAsc(movieId));
-        model.addAttribute("currentEpisode", episode);
+        model.addAttribute("currentEpisode", currentEpisode);
         model.addAttribute("canWatch", canWatch);
         model.addAttribute("relatedMovies", movieService.getRelatedMovies(movie));
-        return "movie/watch";
     }
 }

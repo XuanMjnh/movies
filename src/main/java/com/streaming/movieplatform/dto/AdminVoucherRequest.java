@@ -1,5 +1,6 @@
 package com.streaming.movieplatform.dto;
 
+import com.streaming.movieplatform.enums.VoucherAudienceMatchMode;
 import com.streaming.movieplatform.enums.VoucherDiscountType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -43,6 +44,19 @@ public class AdminVoucherRequest {
     private Integer quantity;
 
     private boolean active = true;
+
+    @NotNull(message = "Tổng chi tiêu tối thiểu không được để trống")
+    @PositiveOrZero(message = "Tổng chi tiêu tối thiểu không được âm")
+    private BigDecimal minTotalSpentAmount = BigDecimal.ZERO;
+
+    @NotNull(message = "Tuổi tài khoản tối thiểu không được để trống")
+    @PositiveOrZero(message = "Tuổi tài khoản tối thiểu không được âm")
+    private Integer minAccountAgeDays = 0;
+
+    @NotNull(message = "Kiểu xét điều kiện không được để trống")
+    private VoucherAudienceMatchMode audienceMatchMode = VoucherAudienceMatchMode.ALL;
+
+    private boolean autoDisplayEnabled = false;
 
     @NotNull(message = "Thời gian bắt đầu không được để trống")
     @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
@@ -130,6 +144,38 @@ public class AdminVoucherRequest {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public BigDecimal getMinTotalSpentAmount() {
+        return minTotalSpentAmount;
+    }
+
+    public void setMinTotalSpentAmount(BigDecimal minTotalSpentAmount) {
+        this.minTotalSpentAmount = minTotalSpentAmount;
+    }
+
+    public Integer getMinAccountAgeDays() {
+        return minAccountAgeDays;
+    }
+
+    public void setMinAccountAgeDays(Integer minAccountAgeDays) {
+        this.minAccountAgeDays = minAccountAgeDays;
+    }
+
+    public VoucherAudienceMatchMode getAudienceMatchMode() {
+        return audienceMatchMode;
+    }
+
+    public void setAudienceMatchMode(VoucherAudienceMatchMode audienceMatchMode) {
+        this.audienceMatchMode = audienceMatchMode;
+    }
+
+    public boolean isAutoDisplayEnabled() {
+        return autoDisplayEnabled;
+    }
+
+    public void setAutoDisplayEnabled(boolean autoDisplayEnabled) {
+        this.autoDisplayEnabled = autoDisplayEnabled;
     }
 
     public LocalDateTime getStartAt() {
