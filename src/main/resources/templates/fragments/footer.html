@@ -4,20 +4,32 @@
 <footer th:fragment="footer" class="app-footer mt-5">
     <div class="container-fluid container-stream py-5">
         <div class="footer-shell">
-            <div class="row g-4 g-xl-5">
-                <div class="col-xl-5">
+            <div class="row g-4 g-xl-5 footer-main">
+                <div class="col-xl-4">
                     <a class="footer-brand text-decoration-none" th:href="@{/}">
                         <span class="brand-logo"><i class="bi bi-play-fill"></i></span>
                         <span class="brand-name">Best<span class="text-accent">Moives</span></span>
                     </a>
                     <p class="footer-copy mb-4">
-                        Nền tảng xem phim phong cách dark-cinema, tối ưu cho trải nghiệm duyệt nhanh,
-                        xem mượt và quản lý gói thành viên trong một giao diện thống nhất.
+                        BestMoives là nền tảng xem phim trực tuyến với trải nghiệm hiện đại, tốc độ truy cập nhanh
+                        và hệ thống thành viên, ví tiền được trình bày rõ ràng, dễ sử dụng.
                     </p>
-                    <div class="d-flex flex-wrap gap-2">
-                        <span class="footer-pill">Phim lẻ & phim bộ</span>
-                        <span class="footer-pill">Dark mode mặc định</span>
-                        <span class="footer-pill">Ví tiền & thành viên</span>
+
+                    <div class="footer-contact-list">
+                        <div class="footer-contact-item">
+                            <span class="footer-contact-icon"><i class="bi bi-envelope"></i></span>
+                            <div>
+                                <p class="footer-contact-label mb-1">Email hỗ trợ</p>
+                                <a href="mailto:support@bestmoives.vn">support@bestmoives.vn</a>
+                            </div>
+                        </div>
+                        <div class="footer-contact-item">
+                            <span class="footer-contact-icon"><i class="bi bi-telephone"></i></span>
+                            <div>
+                                <p class="footer-contact-label mb-1">Hotline</p>
+                                <a href="tel:19001234">1900 1234</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -28,36 +40,53 @@
                         <li><a th:href="@{/movies}">Tất cả phim</a></li>
                         <li><a th:href="@{/movies(movieType='MOVIE')}">Phim lẻ</a></li>
                         <li><a th:href="@{/movies(movieType='SERIES')}">Phim bộ</a></li>
+                        <li><a th:href="@{/subscription/plans}">Gói thành viên</a></li>
                     </ul>
                 </div>
 
                 <div class="col-sm-6 col-xl-2">
-                    <p class="eyebrow mb-3">Tiện ích</p>
+                    <p class="eyebrow mb-3">Tài khoản</p>
                     <ul class="list-unstyled footer-links mb-0">
-                        <li><a th:href="@{/subscription/plans}">Gói thành viên</a></li>
+                        <li><a th:href="@{/user/profile}">Hồ sơ cá nhân</a></li>
                         <li><a th:href="@{/user/wallet}">Ví tiền</a></li>
                         <li><a th:href="@{/user/history}">Lịch sử xem</a></li>
                         <li><a th:href="@{/user/favorites}">Yêu thích</a></li>
+                        <li><a th:href="@{/user/subscription/current}">Thành viên hiện tại</a></li>
                     </ul>
                 </div>
 
-                <div class="col-xl-3">
+                <div class="col-sm-6 col-xl-2">
+                    <p class="eyebrow mb-3">Hỗ trợ</p>
+                    <ul class="list-unstyled footer-links mb-0">
+                        <li><a th:href="@{/user/wallet/deposit}">Nạp tiền</a></li>
+                        <li><a th:href="@{/user/wallet/transactions}">Lịch sử giao dịch</a></li>
+                        <li><a th:href="@{/login}">Đăng nhập</a></li>
+                        <li><a th:href="@{/register}">Đăng ký</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-xl-2">
                     <div class="footer-panel">
-                        <p class="eyebrow mb-2">Xem ngay</p>
-                        <h5 class="text-white mb-2">Bắt đầu với kho phim được cập nhật liên tục</h5>
-                        <p class="text-secondary mb-3">
-                            Tìm phim theo thể loại, quốc gia hoặc nâng cấp gói để mở rộng trải nghiệm xem.
-                        </p>
-                        <div class="d-flex flex-wrap gap-2">
-                            <a class="btn btn-accent" th:href="@{/movies}">Khám phá phim</a>
-                            <a class="btn btn-surface" th:href="@{/subscription/plans}">Xem gói</a>
-                        </div>
+                        <p class="eyebrow mb-2">Cam kết</p>
+                        <ul class="list-unstyled footer-checklist mb-0">
+                            <li><i class="bi bi-check2-circle"></i><span>Điều hướng rõ ràng, dễ tìm nội dung</span></li>
+                            <li><i class="bi bi-check2-circle"></i><span>Thông tin thành viên và số dư hiển thị minh bạch</span></li>
+                            <li><i class="bi bi-check2-circle"></i><span>Lưu lịch sử xem và danh sách yêu thích theo tài khoản</span></li>
+                        </ul>
                     </div>
                 </div>
             </div>
 
-            <div class="footer-bottom d-flex justify-content-between flex-wrap gap-3">
-                <span>© <span th:text="${currentYear}">2026</span> BestMoives. All rights reserved.</span>
+            <div class="footer-bottom">
+                <div class="footer-bottom-meta">
+                    <span>© <span th:text="${currentYear}">2026</span> BestMoives. Bảo lưu mọi quyền.</span>
+                    <span>Nền tảng xem phim, thành viên và ví điện tử trong một trải nghiệm thống nhất.</span>
+                </div>
+                <div class="footer-bottom-links">
+                    <a th:href="@{/}">Điều khoản sử dụng</a>
+                    <a th:href="@{/}">Chính sách bảo mật</a>
+                    <a th:href="@{/}">Liên hệ hợp tác</a>
+                </div>
             </div>
         </div>
     </div>

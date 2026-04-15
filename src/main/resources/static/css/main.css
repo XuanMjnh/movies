@@ -1073,6 +1073,9 @@ html[data-theme="light"] .app-footer {
         color-mix(in srgb, var(--panel-strong) 92%, transparent);
     box-shadow: var(--shadow);
 }
+.footer-main {
+    align-items: start;
+}
 .footer-brand {
     display: inline-flex;
     align-items: center;
@@ -1084,17 +1087,43 @@ html[data-theme="light"] .app-footer {
     color: var(--muted);
     line-height: 1.75;
 }
-.footer-pill {
+.footer-contact-list {
+    display: grid;
+    gap: .9rem;
+}
+.footer-contact-item {
+    display: flex;
+    align-items: start;
+    gap: .85rem;
+    padding: .95rem 1rem;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg-elevated) 82%, transparent);
+}
+.footer-contact-icon {
+    width: 2.5rem;
+    height: 2.5rem;
     display: inline-flex;
     align-items: center;
-    min-height: 40px;
-    padding: .55rem .9rem;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    background: color-mix(in srgb, var(--bg-elevated) 76%, transparent);
-    color: var(--text);
-    font-size: .9rem;
+    justify-content: center;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    color: var(--accent);
+    flex-shrink: 0;
+}
+.footer-contact-label {
+    color: var(--muted);
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
     font-weight: 600;
+}
+.footer-contact-item a {
+    color: var(--text);
+    text-decoration: none;
+}
+.footer-contact-item a:hover {
+    color: var(--accent);
 }
 .footer-links a {
     display: inline-flex;
@@ -1118,12 +1147,50 @@ html[data-theme="light"] .app-footer {
         linear-gradient(180deg, color-mix(in srgb, var(--accent) 8%, transparent), transparent 100%),
         color-mix(in srgb, var(--bg-elevated) 78%, transparent);
 }
+.footer-checklist {
+    display: grid;
+    gap: .8rem;
+}
+.footer-checklist li {
+    display: flex;
+    align-items: start;
+    gap: .65rem;
+    color: var(--text);
+    line-height: 1.6;
+}
+.footer-checklist i {
+    color: var(--accent);
+    margin-top: .2rem;
+}
 .footer-bottom {
     margin-top: clamp(1.75rem, 3vw, 2.4rem);
     padding-top: 1rem;
     border-top: 1px solid var(--line);
     color: var(--muted);
     font-size: .92rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.footer-bottom-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem 1.25rem;
+}
+.footer-bottom-links {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.footer-bottom-links a {
+    text-decoration: none;
+    color: var(--muted);
+}
+.footer-bottom-links a:hover {
+    color: var(--text);
 }
 hr,
 .border-secondary-subtle,
@@ -1138,6 +1205,14 @@ hr,
 
     .footer-bottom {
         font-size: .86rem;
+        align-items: start;
+    }
+
+    .footer-bottom-meta,
+    .footer-bottom-links {
+        flex-direction: column;
+        align-items: start;
+        gap: .45rem;
     }
 }
 

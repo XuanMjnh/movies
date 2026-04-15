@@ -139,7 +139,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public UserSubscription getCurrentSubscription(User user) {
         UserSubscription subscription = findLatestActiveSubscription(user);
         if (subscription == null) {
@@ -349,6 +348,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         return description;
     }
+
     private record VoucherEligibilityContext(BigDecimal totalSpent, long accountAgeDays) {
     }
 }
