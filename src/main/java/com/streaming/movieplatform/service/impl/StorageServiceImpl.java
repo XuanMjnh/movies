@@ -1,7 +1,5 @@
 package com.streaming.movieplatform.service.impl;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
 import com.streaming.movieplatform.exception.BusinessException;
 import com.streaming.movieplatform.service.StorageService;
 import jakarta.annotation.PostConstruct;
@@ -11,43 +9,28 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Map;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @Service
 public class StorageServiceImpl implements StorageService {
 
-    @Value("${app.cloudinary.url:}")
-    private String cloudinaryUrl;
+    @Value("${app.upload-dir}")
+    private String uploadDir;
 
-    @Value("${app.cloudinary.cloud-name:}")
-    private String cloudName;
-
-    @Value("${app.cloudinary.api-key:}")
-    private String apiKey;
-
-    @Value("${app.cloudinary.api-secret:}")
-    private String apiSecret;
-
-    @Value("${app.cloudinary.folder-prefix:movie-streaming-platform}")
-    private String folderPrefix;
-
-    private Cloudinary cloudinary;
+    private Path uploadRoot;
 
     @PostConstruct
-    void initCloudinary() {
-        if (StringUtils.hasText(cloudinaryUrl)) {
-            cloudinary = new Cloudinary(cloudinaryUrl.trim());
-        } else if (StringUtils.hasText(cloudName) && StringUtils.hasText(apiKey) && StringUtils.hasText(apiSecret)) {
-            cloudinary = new Cloudinary(ObjectUtils.asMap(
-                    "cloud_name", cloudName.trim(),
-                    "api_key", apiKey.trim(),
-                    "api_secret", apiSecret.trim()
-            ));
-        }
-
-        if (cloudinary != null) {
-            cloudinary.config.secure = true;
+    void initUploadDirectory() {
+        try {
+            uploadRoot = Paths.get(uploadDir).toAbsolutePath().normalize();
+            Files.createDirectories(uploadRoot);
+        } catch (IOException e) {
+            throw new IllegalStateException("Không thể khởi tạo thư mục upload", e);
         }
     }
 
@@ -56,58 +39,75 @@ public class StorageServiceImpl implements StorageService {
         if (file == null || file.isEmpty()) {
             return currentValue;
         }
-        if (cloudinary == null) {
-            throw new BusinessException("Cloudinary chua duoc cau hinh. Hay them CLOUDINARY_URL hoac bo CLOUDINARY_CLOUD_NAME/CLOUDINARY_API_KEY/CLOUDINARY_API_SECRET.");
-        }
+
+        String safeFolderName = sanitizeFolderName(folderName);
+        Path targetDirectory = uploadRoot.resolve(safeFolderName).normalize();
+        validatePathInsideUploadRoot(targetDirectory);
+
+        String storedFilename = buildStoredFilename(file.getOriginalFilename());
+        Path targetFile = targetDirectory.resolve(storedFilename).normalize();
+        validatePathInsideUploadRoot(targetFile);
 
         try {
-            Map<?, ?> uploadResult = cloudinary.uploader().upload(
-                    file.getBytes(),
-                    ObjectUtils.asMap(
-                            "resource_type", "auto",
-                            "folder", resolveFolder(folderName),
-                            "public_id", buildPublicId(file.getOriginalFilename()),
-                            "overwrite", false
-                    )
-            );
-
-            Object secureUrl = uploadResult.get("secure_url");
-            if (secureUrl == null || !StringUtils.hasText(secureUrl.toString())) {
-                throw new BusinessException("Cloudinary khong tra ve secure_url hop le.");
+            Files.createDirectories(targetDirectory);
+            try (InputStream inputStream = file.getInputStream()) {
+                Files.copy(inputStream, targetFile, StandardCopyOption.REPLACE_EXISTING);
             }
-            return secureUrl.toString();
+            deleteCurrentFileIfLocal(currentValue);
+            return "/uploads/" + safeFolderName + "/" + storedFilename;
         } catch (IOException e) {
-            throw new BusinessException("Khong the upload file len Cloudinary: " + e.getMessage());
+            throw new BusinessException("Không thể lưu file vào thư mục uploads: " + e.getMessage());
         }
     }
 
-    private String resolveFolder(String folderName) {
-        String cleanedFolder = StringUtils.hasText(folderName)
-                ? folderName.trim().replace("\\", "/").replaceAll("^/+", "").replaceAll("/+$", "")
-                : "misc";
-
-        if (!StringUtils.hasText(folderPrefix)) {
-            return cleanedFolder;
+    private void deleteCurrentFileIfLocal(String currentValue) throws IOException {
+        if (!StringUtils.hasText(currentValue) || !currentValue.startsWith("/uploads/")) {
+            return;
         }
 
-        String cleanedPrefix = folderPrefix.trim().replace("\\", "/").replaceAll("^/+", "").replaceAll("/+$", "");
-        return cleanedPrefix + "/" + cleanedFolder;
+        String relativePath = currentValue.substring("/uploads/".length());
+        if (!StringUtils.hasText(relativePath)) {
+            return;
+        }
+
+        Path existingFile = uploadRoot.resolve(relativePath).normalize();
+        validatePathInsideUploadRoot(existingFile);
+        Files.deleteIfExists(existingFile);
     }
 
-    private String buildPublicId(String originalFilename) {
-        String extensionlessName = StringUtils.hasText(originalFilename)
-                ? StringUtils.stripFilenameExtension(StringUtils.cleanPath(originalFilename))
-                : "upload";
+    private String sanitizeFolderName(String folderName) {
+        String cleaned = StringUtils.hasText(folderName) ? folderName.trim() : "misc";
+        cleaned = cleaned.replace("\\", "/").replaceAll("^/+", "").replaceAll("/+$", "");
+        cleaned = cleaned.replaceAll("[^a-zA-Z0-9/_-]", "-");
+        if (!StringUtils.hasText(cleaned)) {
+            return "misc";
+        }
+        return cleaned;
+    }
 
-        String slug = extensionlessName
-                .toLowerCase()
+    private String buildStoredFilename(String originalFilename) {
+        String baseName = StringUtils.stripFilenameExtension(StringUtils.cleanPath(
+                StringUtils.hasText(originalFilename) ? originalFilename : "upload"
+        ));
+        String extension = StringUtils.getFilenameExtension(originalFilename);
+
+        String slug = baseName.toLowerCase()
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("(^-+|-+$)", "");
-
         if (!StringUtils.hasText(slug)) {
             slug = "upload";
         }
 
-        return slug + "-" + UUID.randomUUID();
+        String uniquePart = UUID.randomUUID().toString().replace("-", "");
+        if (StringUtils.hasText(extension)) {
+            return slug + "-" + uniquePart + "." + extension.toLowerCase();
+        }
+        return slug + "-" + uniquePart;
+    }
+
+    private void validatePathInsideUploadRoot(Path path) {
+        if (!path.startsWith(uploadRoot)) {
+            throw new BusinessException("Đường dẫn upload không hợp lệ.");
+        }
     }
 }

@@ -1,7 +1,6 @@
 package com.streaming.movieplatform.controller.auth;
 
 import com.streaming.movieplatform.controller.support.FormFlowSupport;
-import com.streaming.movieplatform.dto.ForgotPasswordRequest;
 import com.streaming.movieplatform.dto.RegisterRequest;
 import com.streaming.movieplatform.exception.BusinessException;
 import com.streaming.movieplatform.service.UserService;
@@ -54,30 +53,6 @@ public class AuthController {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             FormFlowSupport.flashForm(redirectAttributes, "registerRequest", request);
             return "redirect:/register";
-        }
-    }
-
-    @GetMapping("/forgot-password")
-    public String forgotPasswordPage(Model model) {
-        FormFlowSupport.addIfAbsent(model, "forgotPasswordRequest", ForgotPasswordRequest::new);
-        return "auth/forgot-password";
-    }
-
-    @PostMapping("/forgot-password")
-    public String forgotPassword(@Valid @ModelAttribute("forgotPasswordRequest") ForgotPasswordRequest request,
-                                 BindingResult bindingResult,
-                                 RedirectAttributes redirectAttributes) {
-        if (bindingResult.hasErrors()) {
-            return FormFlowSupport.redirectWithValidationErrors(redirectAttributes, "/forgot-password", "forgotPasswordRequest", request, bindingResult);
-        }
-        try {
-            userService.resetPassword(request);
-            redirectAttributes.addFlashAttribute("successMessage", "Đặt lại mật khẩu thành công. Hãy đăng nhập bằng mật khẩu mới.");
-            return "redirect:/login";
-        } catch (BusinessException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-            FormFlowSupport.flashForm(redirectAttributes, "forgotPasswordRequest", request);
-            return "redirect:/forgot-password";
         }
     }
 }

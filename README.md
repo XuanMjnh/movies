@@ -27,7 +27,7 @@ Dự án mô phỏng một nền tảng streaming mini với các luồng chính
 - Bootstrap 5
 - Maven
 - spring-dotenv
-- Cloudinary Upload API
+- Local file uploads (`/uploads/**`)
 
 ## 3) Cấu trúc thư mục
 
@@ -36,7 +36,7 @@ movie-streaming-platform/
 ├─ pom.xml
 ├─ README.md
 ├─ .env                        # local only, không commit
-├─ uploads/                    # legacy local uploads (optional)
+├─ uploads/                    # local uploaded files
 └─ src/
    └─ main/
       ├─ java/com/streaming/movieplatform/
@@ -59,7 +59,7 @@ movie-streaming-platform/
          │  ├─ css/
          │  ├─ images/
          │  ├─ js/
-         │  └─ uploads/        # legacy static path
+         │  └─ uploads/        # local static path
          └─ templates/
             ├─ admin/
             ├─ auth/
@@ -89,9 +89,6 @@ DB_USERNAME=root
 DB_PASSWORD=123456
 DB_DRIVER=com.mysql.cj.jdbc.Driver
 
-CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>
-CLOUDINARY_FOLDER_PREFIX=movie-streaming-platform
-
 VNPAY_ENABLED=false
 VNPAY_TMN_CODE=
 VNPAY_HASH_SECRET=
@@ -110,8 +107,6 @@ DB_USERNAME=your-username
 DB_PASSWORD=your-password
 DB_DRIVER=com.mysql.cj.jdbc.Driver
 
-CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>
-CLOUDINARY_FOLDER_PREFIX=movie-streaming-platform
 ```
 
 File `.env` đã được ignore trong `.gitignore`.
@@ -245,32 +240,19 @@ GET  /payment/vnpay/ipn
 
 ## 10) Upload file
 
-Ảnh `banner` và `avatar` mới được upload trực tiếp lên **Cloudinary**.
+Ảnh `banner` và `avatar` mới được upload trực tiếp vào thư mục local `uploads/`.
 
-Backend nhận file `MultipartFile`, ký request server-side bằng `api_secret`, gửi lên Cloudinary Upload API và lưu `secure_url` trả về vào database. Vì vậy:
+Backend nhận file `MultipartFile`, lưu file vào thư mục con như `uploads/banners` hoặc `uploads/avatars`, rồi lưu đường dẫn `/uploads/**` vào database. Vì vậy:
 
-- Dữ liệu mới trong DB sẽ là URL đầy đủ từ Cloudinary
-- Không cần expose file mới qua thư mục local để hiển thị ảnh
-- Các URL local kiểu `/uploads/**` chỉ còn để tương thích với dữ liệu cũ nếu database vẫn còn trỏ về local path
+- Dữ liệu mới trong DB sẽ là đường dẫn local dạng `/uploads/**`
+- Ảnh được phục vụ trực tiếp từ thư mục local qua `WebMvcConfig`
+- Không cần cấu hình dịch vụ upload ảnh cloud
 
-Biến môi trường liên quan:
-
-```dotenv
-CLOUDINARY_URL=cloudinary://<api_key>:<api_secret>@<cloud_name>
-CLOUDINARY_FOLDER_PREFIX=movie-streaming-platform
-```
-
-Cấu hình tương ứng trong `application.properties`:
+Biến cấu hình liên quan:
 
 ```properties
-app.cloudinary.url=${CLOUDINARY_URL:}
-app.cloudinary.cloud-name=${CLOUDINARY_CLOUD_NAME:}
-app.cloudinary.api-key=${CLOUDINARY_API_KEY:}
-app.cloudinary.api-secret=${CLOUDINARY_API_SECRET:}
-app.cloudinary.folder-prefix=${CLOUDINARY_FOLDER_PREFIX:movie-streaming-platform}
+app.upload-dir=uploads
 ```
-
-`app.upload-dir=uploads` vẫn được giữ lại để phục vụ ảnh local cũ nếu cần.
 
 ## 11) Cấu hình VNPAY
 
@@ -308,5 +290,4 @@ Thông tin dưới đây chỉ dùng cho môi trường sandbox khi kiểm thử
 - Repo hiện chưa có Maven Wrapper, vì vậy môi trường chạy bằng terminal cần có Maven cài sẵn
 - Nếu IntelliJ không đọc `.env`, `Working directory` của Run Configuration cần trỏ về thư mục gốc project
 - Với Aiven hoặc dịch vụ MySQL managed khác, tham số `sslMode=REQUIRED` cần được giữ nguyên
-- Nếu đã chia sẻ API Secret Cloudinary ra ngoài, nên rotate key sau khi cấu hình xong
 - Để demo đầy đủ dữ liệu phim, gói thành viên và banner, database cần được import bộ dữ liệu nền trước

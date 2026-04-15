@@ -1,6 +1,5 @@
 package com.streaming.movieplatform.service.impl;
 
-import com.streaming.movieplatform.dto.ForgotPasswordRequest;
 import com.streaming.movieplatform.dto.PasswordChangeRequest;
 import com.streaming.movieplatform.dto.ProfileUpdateRequest;
 import com.streaming.movieplatform.dto.RegisterRequest;
@@ -130,14 +129,6 @@ public class UserServiceImpl implements UserService {
         }
         currentUser.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(currentUser);
-    }
-
-    @Override
-    public void resetPassword(ForgotPasswordRequest request) {
-        User user = userRepository.findByEmail(request.getEmail().trim().toLowerCase(Locale.ROOT))
-                .orElseThrow(() -> new BusinessException("Không tìm thấy tài khoản với email đã nhập"));
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        userRepository.save(user);
     }
 
     @Override

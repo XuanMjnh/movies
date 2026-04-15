@@ -1,6 +1,5 @@
 package com.streaming.movieplatform.service;
 
-import com.streaming.movieplatform.dto.ForgotPasswordRequest;
 import com.streaming.movieplatform.dto.PasswordChangeRequest;
 import com.streaming.movieplatform.dto.ProfileUpdateRequest;
 import com.streaming.movieplatform.dto.RegisterRequest;
@@ -14,7 +13,6 @@ public interface UserService {
     User getById(Long id);
     User updateProfile(ProfileUpdateRequest request);
     void changePassword(PasswordChangeRequest request);
-    void resetPassword(ForgotPasswordRequest request);
     AccessLevel getCurrentAccessLevel(User user);
     UserSubscription getCurrentSubscription(User user);
     long getRemainingSubscriptionDays(User user);
