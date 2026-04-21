@@ -8,8 +8,7 @@
     <div class="row justify-content-center">
         <div class="col-xl-6 col-lg-8">
             <div class="glass-panel">
-                <h1 class="h3 text-white mb-3">Nạp tiền qua VNPAY</h1>
-                <p class="text-secondary">Nhập số tiền cần nạp, hệ thống sẽ tạo giao dịch chờ xác nhận rồi chuyển bạn sang cổng thanh toán VNPAY.</p>
+                <h1 class="h3 text-white mb-3">Nạp tiền</h1>
                 <div class="pill-dark mb-4">Số dư hiện tại: <span class="ms-2 text-accent" th:text="${#numbers.formatDecimal(wallet.balance, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span></div>
                 <form th:action="@{/user/wallet/deposit}" th:object="${depositRequest}" method="post" class="vstack gap-3">
                     <div>
@@ -22,13 +21,9 @@
                             <i class="bi bi-qr-code-scan me-2"></i>Thanh toán với VNPAY
                         </button>
                         <button type="button" class="btn btn-outline-light" onclick="document.querySelector('[name=amount]').value=100000">+100,000</button>
-                        <button type="button" class="btn btn-outline-light" onclick="document.querySelector('[name=amount]').value=300000">+300,000</button>
+                        <button type="button" class="btn btn-outline-light" onclick="document.querySelector('[name=amount]').value=200000">+200,000</button>
                     </div>
                 </form>
-                <div class="alert alert-secondary bg-dark-subtle border-0 text-light mt-4 mb-0">
-                    <div class="fw-semibold mb-1">Lưu ý</div>
-                    <div class="small text-secondary">Ví chỉ được cộng tiền sau khi VNPAY gọi IPN xác nhận giao dịch thành công. Khi test local, bạn nên public endpoint <code>/payment/vnpay/ipn</code> bằng domain HTTPS hoặc ngrok.</div>
-                </div>
             </div>
         </div>
     </div>

@@ -14,7 +14,7 @@
             <strong class="text-white" th:text="${#numbers.formatDecimal(walletBalance, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
         </div>
         <div>
-            <a class="btn btn-outline-light mt-3" th:href="@{/user/wallet/deposit}" sec:authorize="isAuthenticated()">Nạp tiền qua VNPAY trước khi mua gói</a>
+            <a class="btn btn-outline-light mt-3" th:href="@{/user/wallet/deposit}" sec:authorize="isAuthenticated()">Nạp tiền</a>
         </div>
     </div>
     <section sec:authorize="isAuthenticated()" th:if="${eligibleVouchers != null and !eligibleVouchers.isEmpty()}" class="mb-5">

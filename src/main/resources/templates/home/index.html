@@ -59,7 +59,7 @@
             <div>
                 <p class="eyebrow mb-2">Nội dung nổi bật</p>
                 <h2 class="section-title">Xem nhiều và nổi bật</h2>
-                <p class="section-subtitle mb-0">Bố cục ngang, tối ưu cho cảm giác duyệt phim như các web streaming hiện đại.</p>
+                
             </div>
             <a th:if="${featuredMovies != null and #lists.size(featuredMovies) > featuredLimit}" th:href="@{/movies}" class="btn btn-surface-outline">Khám phá toàn bộ</a>
         </div>
@@ -77,7 +77,6 @@
             <div>
                 <p class="eyebrow mb-2">Dành cho bạn</p>
                 <h2 class="section-title">Tiếp tục xem</h2>
-                <p class="section-subtitle mb-0">Quay lại nhanh đúng nội dung bạn đang theo dõi.</p>
             </div>
             <a th:if="${continueMovies != null and #lists.size(continueMovies) > continueLimit}" class="btn btn-surface-outline" th:href="@{/user/history}">Khám phá toàn bộ</a>
         </div>

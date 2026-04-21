@@ -7,7 +7,7 @@
     <div class="auth-card">
         <div class="text-center mb-4">
             <h1 class="fw-bold text-white">Chào mừng quay lại</h1>
-            <p class="text-secondary mb-0">Đăng nhập để xem tiếp, nạp tiền và mua gói thành viên.</p>
+            <p class="text-secondary mb-0">Đăng nhập để tận hưởng các tính năng tuyệt vời</p>
         </div>
         <div th:replace="~{fragments/alerts :: alerts}"></div>
         <div th:if="${param.error}" class="alert alert-danger">Email hoặc mật khẩu không chính xác.</div>
@@ -15,7 +15,7 @@
         <form th:action="@{/login}" method="post" class="vstack gap-3">
             <div>
                 <label class="form-label">Email</label>
-                <input type="email" name="username" class="form-control form-control-lg" placeholder="user@example.com" required>
+                <input type="email" name="username" class="form-control form-control-lg" placeholder="Email" required>
             </div>
             <div>
                 <label class="form-label">Mật khẩu</label>

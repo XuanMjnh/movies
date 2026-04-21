@@ -36,7 +36,7 @@
                 </div>
 
                 <div class="alert alert-warning border-0" th:if="${result.pendingConfirmation}">
-                    VNPAY chỉ dùng <strong>Return URL</strong> để hiển thị kết quả cho khách hàng. Ví sẽ chỉ được cộng tiền sau khi hệ thống nhận <strong>IPN</strong> hợp lệ từ VNPAY.
+                   Đang xử lý giao dịch. Vui lòng chờ trong giây lát, hệ thống sẽ cập nhật ví sau khi nhận được xác nhận từ VNPAY.
                 </div>
                 <div class="alert alert-danger border-0" th:if="${!result.validSignature}">
                     Dữ liệu trả về không vượt qua bước kiểm tra chữ ký số. Hệ thống sẽ không cập nhật ví cho giao dịch này.
